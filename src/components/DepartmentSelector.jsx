@@ -128,7 +128,7 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
             ))}
           </motion.div>
         ) : !selectedFaculty ? (
-          <motion.div key="facs" initial={{ opacity: 0 }} animate{{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <motion.div key="facs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {getFacultiesForUni(selectedUni.id).length === 0 ? (
               <div className="col-span-full text-center py-8" style={{ color: tokens.muted, fontSize: 12 }}>Bu üniversiteye bağlı fakülte bulunamadı</div>
             ) : getFacultiesForUni(selectedUni.id).map((f, i) => (

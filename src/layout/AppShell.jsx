@@ -174,7 +174,7 @@ export default function AppShell({ bolumProp, departmentId }) {
             return (
               <button
                 key={item.id}
-                onClick={() => setActivePage(item.id)}
+                onClick={() => navigate(item.id)}
                 style={{
                   flex: 1,
                   display: "flex",
