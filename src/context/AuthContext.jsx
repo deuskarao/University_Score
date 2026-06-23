@@ -144,20 +144,20 @@ export function AuthProvider({ children }) {
     };
   }, [clearAuthState, fetchProfile]);
 
-  async function register(email, password, fullName, deptData = null) {
+  async function register(email, password, fullName, username, deptData = null) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } }
+      options: { data: { full_name: fullName, username } }
     });
     if (error) throw error;
 
-    // Bölüm/fakülte/üniversite seçimi yapıldıysa profile'a kaydet
-    if (data.user && deptData) {
+    if (data.user) {
       const profileUpdates = {};
-      if (deptData.department_id) profileUpdates.department_id = deptData.department_id;
-      if (deptData.faculty_id) profileUpdates.faculty_id = deptData.faculty_id;
-      if (deptData.university_id) profileUpdates.university_id = deptData.university_id;
+      if (username) profileUpdates.username = username;
+      if (deptData?.department_id) profileUpdates.department_id = deptData.department_id;
+      if (deptData?.faculty_id) profileUpdates.faculty_id = deptData.faculty_id;
+      if (deptData?.university_id) profileUpdates.university_id = deptData.university_id;
 
       if (Object.keys(profileUpdates).length > 0) {
         await supabase

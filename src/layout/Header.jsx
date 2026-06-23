@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useTheme } from "../theme/ThemeProvider";
 import { useAuth } from "../context/AuthContext";
+import { useWindowSize } from "../components/shared.jsx";
 
-export default function Header({ sidebarWidth, onOpenMobileSidebar, pageTitle }) {
+export default function Header({ sidebarWidth, onOpenMobileSidebar, pageTitle, donemler, aktifDonem, onDonemChange }) {
   const { tokens, mode, toggleTheme } = useTheme();
   const { user, profile, logout } = useAuth();
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const w = useWindowSize();
+  const mobil = w < 768;
 
   const initial = ((profile?.full_name || user?.email || "?")[0] || "?").toUpperCase();
 
@@ -49,6 +52,29 @@ export default function Header({ sidebarWidth, onOpenMobileSidebar, pageTitle })
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {mobil && donemler && (
+          <select
+            value={aktifDonem}
+            onChange={(e) => onDonemChange(e.target.value)}
+            style={{
+              padding: "6px 10px",
+              borderRadius: 10,
+              border: `1px solid ${tokens.border}`,
+              background: tokens.surface,
+              color: tokens.textPrimary,
+              fontSize: 13,
+              fontWeight: 600,
+              outline: "none",
+              appearance: "none",
+              cursor: "pointer"
+            }}
+          >
+            {donemler.map(d => (
+              <option key={d.value} value={d.value}>{d.short || d.label}</option>
+            ))}
+          </select>
+        )}
+
         <button
           onClick={toggleTheme}
           aria-label="Temayı değiştir"

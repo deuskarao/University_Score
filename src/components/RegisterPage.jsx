@@ -19,128 +19,10 @@ const focusProps = {
   onBlur: (e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.background = "rgba(255,255,255,0.04)"; e.target.style.boxShadow = "none"; },
 };
 
-// ——— Mini bölüm seçici (kayıt içi) ———
-function InlineSelector({ universities, faculties, departments, facultyDepartments, onSelect }) {
-  const [step, setStep] = useState("uni"); // "uni" | "fac" | "dept"
-  const [selUni, setSelUni] = useState(null);
-  const [selFac, setSelFac] = useState(null);
-  const [selDept, setSelDept] = useState(null);
-
-  const facForUni = selUni ? faculties.filter(f => f.university_id === selUni.id) : [];
-  const deptForFac = selFac
-    ? departments.filter(d =>
-        facultyDepartments.filter(fd => fd.faculty_id === selFac.id).map(fd => fd.department_id).includes(d.id)
-      )
-    : [];
-
-  function pickUni(u) { setSelUni(u); setSelFac(null); setSelDept(null); setStep("fac"); }
-  function pickFac(f) { setSelFac(f); setSelDept(null); setStep("dept"); }
-  function pickDept(d) {
-    setSelDept(d);
-    onSelect({ university_id: selUni.id, faculty_id: selFac.id, department_id: d.id });
-  }
-  function goBack() {
-    if (step === "dept") { setStep("fac"); setSelFac(null); setSelDept(null); }
-    else if (step === "fac") { setStep("uni"); setSelUni(null); }
-  }
-
-  const stepLabel = {
-    uni: "Üniversite seçin",
-    fac: selUni?.ad || "Fakülte seçin",
-    dept: selFac?.ad || "Bölüm seçin",
-  }[step];
-
-  const items = step === "uni" ? universities : step === "fac" ? facForUni : deptForFac;
-
-  return (
-    <div style={{
-      border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10,
-      background: "rgba(255,255,255,0.02)", overflow: "hidden",
-    }}>
-      {/* Header */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "8px 12px", borderBottom: "1px solid rgba(255,255,255,0.06)",
-      }}>
-        <div style={{ fontSize: 11, color: "rgba(248,250,252,0.5)", fontWeight: 500 }}>
-          {stepLabel}
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          {/* Breadcrumb dots */}
-          {["uni","fac","dept"].map((s, i) => (
-            <span key={s} style={{
-              width: 6, height: 6, borderRadius: "50%",
-              background: s === step ? "#7C3AED" : (
-                (step === "fac" && i === 0) || (step === "dept" && i <= 1)
-                  ? "rgba(124,58,237,0.4)" : "rgba(255,255,255,0.15)"
-              ),
-              transition: "all 0.2s",
-            }} />
-          ))}
-          {step !== "uni" && (
-            <button onClick={goBack} style={{
-              background: "none", border: "none", color: "#8B5CF6",
-              fontSize: 11, cursor: "pointer", padding: "2px 6px",
-              fontFamily: "inherit", fontWeight: 600,
-            }}>← Geri</button>
-          )}
-        </div>
-      </div>
-
-      {/* List */}
-      <div style={{ maxHeight: 160, overflowY: "auto" }}>
-        {items.length === 0 ? (
-          <div style={{ padding: "14px 12px", fontSize: 11, color: "rgba(248,250,252,0.3)", textAlign: "center" }}>
-            {step === "fac" ? "Bu üniversiteye bağlı fakülte bulunamadı" : "Bu fakülteye bağlı bölüm bulunamadı"}
-          </div>
-        ) : items.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => step === "uni" ? pickUni(item) : step === "fac" ? pickFac(item) : pickDept(item)}
-            style={{
-              width: "100%", display: "flex", alignItems: "center", gap: 10,
-              padding: "8px 12px", background: "transparent", border: "none",
-              color: "#F8FAFC", cursor: "pointer", fontFamily: "inherit",
-              borderBottom: "1px solid rgba(255,255,255,0.04)",
-              transition: "background 0.15s",
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = "rgba(124,58,237,0.12)"}
-            onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-          >
-            <span style={{ fontSize: 16 }}>{item.emoji || item.ikon || (step === "dept" ? "📚" : "🏛️")}</span>
-            <span style={{ fontSize: 12, fontWeight: 500, textAlign: "left" }}>{item.ad}</span>
-            {step !== "dept" && (
-              <span style={{ marginLeft: "auto", fontSize: 10, color: "rgba(248,250,252,0.3)" }}>›</span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Selected dept badge */}
-      {selDept && (
-        <div style={{
-          padding: "8px 12px", background: "rgba(124,58,237,0.12)",
-          borderTop: "1px solid rgba(124,58,237,0.2)",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-        }}>
-          <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 600 }}>
-            ✓ {selUni?.ad} › {selFac?.ad} › {selDept.ad}
-          </div>
-          <button
-            type="button"
-            onClick={() => { setSelDept(null); onSelect(null); setStep("dept"); }}
-            style={{ background: "none", border: "none", color: "rgba(248,250,252,0.4)", cursor: "pointer", fontSize: 12, padding: 0, fontFamily: "inherit" }}
-          >✕</button>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function RegisterPage({ onSwitch }) {
   const { register } = useAuth();
   const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -148,31 +30,6 @@ export default function RegisterPage({ onSwitch }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [basarili, setBasarili] = useState(false);
-
-  // Bölüm seçimi
-  const [universities, setUniversities] = useState([]);
-  const [faculties, setFaculties] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [facultyDepartments, setFacultyDepartments] = useState([]);
-  const [dataLoading, setDataLoading] = useState(true);
-  const [selectedDeptData, setSelectedDeptData] = useState(null); // { university_id, faculty_id, department_id }
-
-  useEffect(() => {
-    async function loadData() {
-      const [uniRes, facRes, deptRes, fdRes] = await Promise.all([
-        supabase.from("universities").select("*").order("ad"),
-        supabase.from("faculties").select("*").order("ad"),
-        supabase.from("departments").select("*").order("ad"),
-        supabase.from("faculty_departments").select("*"),
-      ]);
-      if (uniRes.data) setUniversities(uniRes.data);
-      if (facRes.data) setFaculties(facRes.data);
-      if (deptRes.data) setDepartments(deptRes.data);
-      if (fdRes.data) setFacultyDepartments(fdRes.data);
-      setDataLoading(false);
-    }
-    loadData();
-  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -188,14 +45,14 @@ export default function RegisterPage({ onSwitch }) {
       return;
     }
 
-    if (!selectedDeptData) {
-      setError("Lütfen üniversite › fakülte › bölüm seçimini tamamlayın");
+    if (!username || !/^[a-zA-Z0-9_.-]+$/.test(username)) {
+      setError("Lütfen geçerli bir kullanıcı adı girin (Boşluksuz harf, rakam, alt çizgi).");
       return;
     }
 
     setLoading(true);
     try {
-      const data = await register(email, password, fullName, selectedDeptData);
+      const data = await register(email, password, fullName, username, null);
       if (data.session) {
         // Otomatik giriş yapıldı
       } else {
@@ -334,26 +191,10 @@ export default function RegisterPage({ onSwitch }) {
             </div>
           </div>
 
-          {/* Üniversite / Fakülte / Bölüm Seçimi */}
-          <div style={{ marginBottom: 12 }}>
-            <label style={labelStyle}>Üniversite › Fakülte › Bölüm</label>
-            {dataLoading ? (
-              <div style={{
-                height: 44, borderRadius: 8, background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)", display: "flex",
-                alignItems: "center", paddingLeft: 12, fontSize: 12, color: "rgba(248,250,252,0.3)",
-              }}>
-                Veriler yükleniyor...
-              </div>
-            ) : (
-              <InlineSelector
-                universities={universities}
-                faculties={faculties}
-                departments={departments}
-                facultyDepartments={facultyDepartments}
-                onSelect={setSelectedDeptData}
-              />
-            )}
+          {/* Kullanıcı Adı */}
+          <div style={{ marginBottom: 10 }}>
+            <label style={labelStyle}>Kullanıcı Adı</label>
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="kullanici_adi" required style={inputStyle} {...focusProps} />
           </div>
 
           {/* Agreement */}

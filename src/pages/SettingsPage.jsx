@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useTheme } from "../theme/ThemeProvider";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
-import { Overlay, useInputStyle } from "../components/shared.jsx";
+import { Overlay, useInputStyle, useWindowSize } from "../components/shared.jsx";
 
 function downloadFile(filename, content, mime) {
   const blob = new Blob([content], { type: mime });
@@ -21,6 +21,9 @@ export default function SettingsPage({ dersler, stats, bolum }) {
   const [facultyName, setFacultyName] = useState(null);
   const [universityName, setUniversityName] = useState(null);
   const [isUpdatingDept, setIsUpdatingDept] = useState(false);
+
+  const w = useWindowSize();
+  const mobil = w < 768;
   const [usernameModal, setUsernameModal] = useState(false);
   const [usernameInput, setUsernameInput] = useState("");
   const inputStyle = useInputStyle();
@@ -197,7 +200,7 @@ export default function SettingsPage({ dersler, stats, bolum }) {
       </div>
 
       {/* ── Alt Grid ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: mobil ? "1fr" : "1fr 1fr 1fr", gap: 16 }}>
 
         {/* Bildirimler */}
         <SettingCard

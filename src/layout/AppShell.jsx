@@ -11,6 +11,7 @@ import AnalyticsPage from "../pages/AnalyticsPage";
 import SettingsPage from "../pages/SettingsPage";
 import AdminPage from "../pages/AdminPage";
 import DepartmentPage from "../pages/DepartmentPage";
+import DepartmentSelector from "../components/DepartmentSelector";
 
 const PAGE_TITLES = {
   dashboard: "Ana Sayfa",
@@ -30,7 +31,7 @@ const MOBILE_NAV_ITEMS = [
 
 export default function AppShell({ bolumProp, departmentId }) {
   const { tokens } = useTheme();
-  const { profile: authProfile } = useAuth();
+  const { profile: authProfile, updateProfile } = useAuth();
   const w = useWindowSize();
   const mobil = w < 768;
 
@@ -47,7 +48,6 @@ export default function AppShell({ bolumProp, departmentId }) {
       }
     };
     window.addEventListener("hashchange", handleHashChange);
-    // Initial hash set if empty
     if (!window.location.hash) window.location.hash = `/${activePage}`;
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
@@ -61,17 +61,19 @@ export default function AppShell({ bolumProp, departmentId }) {
 
   const d = useDersler({ bolumProp, departmentId });
 
-  if (d.bolumLoading || !d.bolum) return <CenteredMessage text="Bölüm yükleniyor..." />;
+  if (d.bolumLoading) return <CenteredMessage text="Bölüm yükleniyor..." />;
   if (!d.profile) return <CenteredMessage text="Profil yükleniyor..." />;
-  if (d.dbLoading) return <CenteredMessage text="Dersler yükleniyor..." />;
+  if (!d.bolum && authProfile?.department_id) return <CenteredMessage text="Bölüm bilgileri yükleniyor..." />;
+
+  const needsDepartment = authProfile?.role !== "admin" && !authProfile?.department_id;
 
   const donemler = [
     { value: "tumu", label: "Tüm Dönemler", short: "Tümü" },
-    ...Array.from({ length: d.bolum.toplamDonem }, (_, i) => i + 1).map((n) => ({
+    ...(d.bolum ? Array.from({ length: d.bolum.toplamDonem }, (_, i) => i + 1).map((n) => ({
       value: String(n),
       label: `${n}. Dönem`,
       short: `D${n}`,
-    })),
+    })) : []),
   ];
 
   const sidebarWidth = mobil ? 0 : collapsed ? 72 : 220;
@@ -108,33 +110,48 @@ export default function AppShell({ bolumProp, departmentId }) {
       )}
 
       <div style={{ marginLeft: sidebarWidth, transition: "margin-left 200ms ease" }}>
-        <Header sidebarWidth={0} onOpenMobileSidebar={() => setMobileSidebarOpen(true)} pageTitle={PAGE_TITLES[activePage]} />
+        <Header 
+          sidebarWidth={0} 
+          onOpenMobileSidebar={() => setMobileSidebarOpen(true)} 
+          pageTitle={PAGE_TITLES[activePage]} 
+          donemler={donemler}
+          aktifDonem={d.aktifDonem}
+          onDonemChange={d.setAktifDonem}
+        />
         <main style={{ padding: mobil ? "16px 16px 88px" : "24px 28px 40px" }}>
-          {activePage === "dashboard" && <DashboardPage dersler={d.dersler} stats={d.stats} harfNotlari={d.harfNotlari} bolum={d.bolum} />}
-          {activePage === "courses" && (
-            <CoursesPage
-              bolum={d.bolum}
-              profile={d.profile}
-              harfNotlari={d.harfNotlari}
-              harfRenk={d.harfRenk}
-              siraliDersler={d.siraliDersler}
-              siralama={d.siralama}
-              siralamaDegistir={d.siralamaDegistir}
-              modal={d.modal}
-              setModal={d.setModal}
-              form={d.form}
-              silOnay={d.silOnay}
-              setSilOnay={d.setSilOnay}
-              modalAc={d.modalAc}
-              formDegistir={d.formDegistir}
-              kaydet={d.kaydet}
-              sil={d.sil}
-            />
+          {needsDepartment ? (
+            <div style={{ height: "60vh", display: "flex", alignItems: "center", justifyContent: "center", color: tokens.muted }}>
+              Bölümünüzü seçtikten sonra tüm özelliklere erişebilirsiniz.
+            </div>
+          ) : (
+            <>
+              {activePage === "dashboard" && <DashboardPage dersler={d.dersler} stats={d.stats} harfNotlari={d.harfNotlari} bolum={d.bolum} />}
+              {activePage === "courses" && (
+                <CoursesPage
+                  bolum={d.bolum}
+                  profile={d.profile}
+                  harfNotlari={d.harfNotlari}
+                  harfRenk={d.harfRenk}
+                  siraliDersler={d.siraliDersler}
+                  siralama={d.siralama}
+                  siralamaDegistir={d.siralamaDegistir}
+                  modal={d.modal}
+                  setModal={d.setModal}
+                  form={d.form}
+                  silOnay={d.silOnay}
+                  setSilOnay={d.setSilOnay}
+                  modalAc={d.modalAc}
+                  formDegistir={d.formDegistir}
+                  kaydet={d.kaydet}
+                  sil={d.sil}
+                />
+              )}
+              {activePage === "analytics" && <AnalyticsPage dersler={d.dersler} harfNotlari={d.harfNotlari} stats={d.stats} />}
+              {activePage === "settings" && <SettingsPage dersler={d.dersler} stats={d.stats} bolum={d.bolum} />}
+              {activePage === "admin" && <AdminPage />}
+              {activePage === "departments" && <DepartmentPage />}
+            </>
           )}
-          {activePage === "analytics" && <AnalyticsPage dersler={d.dersler} harfNotlari={d.harfNotlari} stats={d.stats} />}
-          {activePage === "settings" && <SettingsPage dersler={d.dersler} stats={d.stats} bolum={d.bolum} />}
-          {activePage === "admin" && <AdminPage />}
-          {activePage === "departments" && <DepartmentPage />}
         </main>
       </div>
 
@@ -179,6 +196,42 @@ export default function AppShell({ bolumProp, departmentId }) {
             );
           })}
         </nav>
+      )}
+
+      {/* Onboarding Overlay */}
+      {needsDepartment && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 9999,
+          background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+          display: "flex", alignItems: "center", justifyContent: "center"
+        }}>
+          <div style={{
+            background: tokens.card, padding: 32, borderRadius: 24,
+            width: "90%", maxWidth: 460, border: `1px solid ${tokens.border}`,
+            boxShadow: tokens.shadowLg, maxHeight: "90vh", overflowY: "auto"
+          }}>
+            <h2 style={{ color: tokens.textPrimary, margin: "0 0 8px", fontSize: 22 }}>Hoş Geldiniz! 👋</h2>
+            <p style={{ color: tokens.muted, margin: "0 0 24px", fontSize: 13, lineHeight: 1.5 }}>
+              UniPulse'u kullanmaya başlamadan önce lütfen eğitim bilgilerinizi seçin.
+            </p>
+            <DepartmentSelector
+              tokens={tokens}
+              onSelect={async (deptData) => {
+                if (!deptData) return;
+                try {
+                  await updateProfile({
+                    university_id: deptData.university_id,
+                    faculty_id: deptData.faculty_id,
+                    department_id: deptData.department_id
+                  });
+                  window.location.reload();
+                } catch(e) {
+                  alert("Kaydedilirken hata oluştu");
+                }
+              }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
