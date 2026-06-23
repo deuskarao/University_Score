@@ -19,7 +19,27 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function AdminPanel({ onBackToUser }) {
   const { tokens } = useTheme();
   const { user, profile } = useAuth();
-  const [activePage, setActivePage] = useState("dashboard");
+  const [activePage, setActivePage] = useState(() => {
+    const hash = window.location.hash.replace("#/", "").replace("#", "");
+    return ["dashboard", "users", "applications", "universities", "settings", "reports", "logs"].includes(hash) ? hash : "dashboard";
+  });
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace("#/", "").replace("#", "");
+      if (["dashboard", "users", "applications", "universities", "settings", "reports", "logs"].includes(hash)) {
+        setActivePage(hash);
+      }
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    if (!window.location.hash) window.location.hash = `/${activePage}`;
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  const navigate = (page) => {
+    window.location.hash = `/${page}`;
+    setActivePage(page);
+  };
   const [selectedUser, setSelectedUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -147,7 +167,7 @@ export default function AdminPanel({ onBackToUser }) {
     <div className="min-h-screen flex" style={{ background: tokens.background, fontFamily: "'Inter', system-ui, sans-serif" }}>
       <AdminSidebar
         activePage={activePage}
-        onNavigate={(page) => { setActivePage(page); setMobileSidebarOpen(false); }}
+        onNavigate={(page) => { navigate(page); setMobileSidebarOpen(false); }}
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         mobileOpen={mobileSidebarOpen}

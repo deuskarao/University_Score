@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTheme } from "../theme/ThemeProvider";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
+import { Overlay, useInputStyle } from "../components/shared.jsx";
 
 function downloadFile(filename, content, mime) {
   const blob = new Blob([content], { type: mime });
@@ -20,6 +21,9 @@ export default function SettingsPage({ dersler, stats, bolum }) {
   const [facultyName, setFacultyName] = useState(null);
   const [universityName, setUniversityName] = useState(null);
   const [isUpdatingDept, setIsUpdatingDept] = useState(false);
+  const [usernameModal, setUsernameModal] = useState(false);
+  const [usernameInput, setUsernameInput] = useState("");
+  const inputStyle = useInputStyle();
 
   useEffect(() => {
     async function loadOrgInfo() {
@@ -84,6 +88,24 @@ export default function SettingsPage({ dersler, stats, bolum }) {
     }
   }
 
+  function openUsernameModal() {
+    setUsernameInput(profile?.username || "");
+    setUsernameModal(true);
+  }
+
+  async function saveUsername() {
+    if (usernameInput && !/^[a-zA-Z0-9_.-]+$/.test(usernameInput)) {
+      alert("Lütfen geçerli bir kullanıcı adı girin (Sadece harf, rakam, alt çizgi, nokta).");
+      return;
+    }
+    try {
+      await updateProfile({ username: usernameInput || null });
+      setUsernameModal(false);
+    } catch (err) {
+      alert("Bu kullanıcı adı zaten alınmış veya geçersiz!");
+    }
+  }
+
   function exportJSON() {
     const payload = { bolum: bolum?.ad, exportedAt: new Date().toISOString(), stats, dersler };
     downloadFile(`unipulse-export-${Date.now()}.json`, JSON.stringify(payload, null, 2), "application/json");
@@ -131,10 +153,15 @@ export default function SettingsPage({ dersler, stats, bolum }) {
 
           {/* Ad + email */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 22, fontWeight: 800, color: tokens.textPrimary, letterSpacing: -0.5 }}>
-              {profile?.full_name || "Kullanıcı"}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <div style={{ fontSize: 22, fontWeight: 800, color: tokens.textPrimary, letterSpacing: -0.5 }}>
+                {profile?.full_name || "Kullanıcı"}
+              </div>
+              <button onClick={openUsernameModal} style={{ fontSize: 13, fontWeight: 700, color: tokens.primary, background: tokens.primary + "15", padding: "4px 10px", borderRadius: 8, border: "none", cursor: "pointer", transition: "all 0.2s" }} onMouseEnter={(e) => e.target.style.background = tokens.primary + "25"} onMouseLeave={(e) => e.target.style.background = tokens.primary + "15"}>
+                {profile?.username ? `@${profile.username}` : "+ Kullanıcı Adı Ekle"}
+              </button>
             </div>
-            <div style={{ fontSize: 13, color: tokens.muted, marginTop: 3 }}>{user?.email}</div>
+            <div style={{ fontSize: 13, color: tokens.muted, marginTop: 4 }}>{user?.email}</div>
             <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
               {infoItems.filter(i => i.value).map(item => (
                 <span key={item.label} style={{
@@ -292,6 +319,26 @@ export default function SettingsPage({ dersler, stats, bolum }) {
         </div>
       </div>
 
+      {usernameModal && (
+        <Overlay onClick={() => setUsernameModal(false)}>
+          <div style={{ background: tokens.card, border: `1px solid ${tokens.border}`, borderRadius: 20, padding: 28, maxWidth: 400, width: "90%", textAlign: "center", boxShadow: tokens.shadowLg }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ fontSize: 36, marginBottom: 16 }}>👤</div>
+            <h3 style={{ color: tokens.textPrimary, margin: "0 0 8px", fontSize: 19 }}>Kullanıcı Adı Belirle</h3>
+            <p style={{ color: tokens.muted, fontSize: 13, margin: "0 0 24px" }}>Sadece harf, rakam, alt çizgi ve nokta kullanabilirsiniz.</p>
+            <input 
+              value={usernameInput} 
+              onChange={(e) => setUsernameInput(e.target.value)} 
+              placeholder="kullanici_adi" 
+              style={{ ...inputStyle, textAlign: "center", marginBottom: 24, fontSize: 15, fontWeight: 600, letterSpacing: 0.5 }} 
+              onFocus={(e) => setTimeout(() => e.target.select(), 10)}
+            />
+            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+              <button onClick={() => setUsernameModal(false)} style={{ padding: "10px 20px", borderRadius: 10, border: `1px solid ${tokens.border}`, background: "transparent", color: tokens.textSecondary, cursor: "pointer", fontWeight: 600, fontSize: 13, transition: "background 0.2s" }} onMouseEnter={(e) => e.target.style.background = tokens.surface} onMouseLeave={(e) => e.target.style.background = "transparent"}>İptal</button>
+              <button onClick={saveUsername} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: tokens.primary, color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 13, transition: "opacity 0.2s", boxShadow: `0 4px 14px ${tokens.primary}40` }} onMouseEnter={(e) => e.target.style.opacity = 0.85} onMouseLeave={(e) => e.target.style.opacity = 1}>Kaydet</button>
+            </div>
+          </div>
+        </Overlay>
+      )}
     </div>
   );
 }

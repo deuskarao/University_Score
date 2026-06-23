@@ -170,8 +170,16 @@ export function AuthProvider({ children }) {
     return data;
   }
 
-  async function login(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  async function login(emailOrName, password) {
+    let finalEmail = emailOrName.trim();
+    if (!finalEmail.includes("@")) {
+      const { data: foundEmail, error: rpcErr } = await supabase.rpc("get_email_by_full_name", { p_name: finalEmail });
+      if (rpcErr || !foundEmail) {
+        throw new Error("Bu kullanıcı adında bir hesap bulunamadı.");
+      }
+      finalEmail = foundEmail;
+    }
+    const { data, error } = await supabase.auth.signInWithPassword({ email: finalEmail, password });
     if (error) throw error;
     if (data.user) {
       const { data: prof, error: profErr } = await supabase

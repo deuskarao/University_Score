@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "../theme/ThemeProvider";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "./Sidebar";
@@ -34,7 +34,28 @@ export default function AppShell({ bolumProp, departmentId }) {
   const w = useWindowSize();
   const mobil = w < 768;
 
-  const [activePage, setActivePage] = useState("dashboard");
+  const [activePage, setActivePage] = useState(() => {
+    const hash = window.location.hash.replace("#/", "").replace("#", "");
+    return ["dashboard", "courses", "analytics", "settings", "admin", "departments"].includes(hash) ? hash : "dashboard";
+  });
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace("#/", "").replace("#", "");
+      if (["dashboard", "courses", "analytics", "settings", "admin", "departments"].includes(hash)) {
+        setActivePage(hash);
+      }
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    // Initial hash set if empty
+    if (!window.location.hash) window.location.hash = `/${activePage}`;
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  const navigate = (page) => {
+    window.location.hash = `/${page}`;
+    setActivePage(page);
+  };
   const [collapsed, setCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -60,7 +81,7 @@ export default function AppShell({ bolumProp, departmentId }) {
       {!mobil && (
         <Sidebar
           activePage={activePage}
-          onNavigate={setActivePage}
+          onNavigate={navigate}
           collapsed={collapsed}
           onToggleCollapsed={() => setCollapsed((c) => !c)}
           mobileOpen={false}
@@ -74,7 +95,7 @@ export default function AppShell({ bolumProp, departmentId }) {
       {mobil && mobileSidebarOpen && (
         <Sidebar
           activePage={activePage}
-          onNavigate={setActivePage}
+          onNavigate={navigate}
           collapsed={false}
           onToggleCollapsed={() => setMobileSidebarOpen(false)}
           mobileOpen={mobileSidebarOpen}

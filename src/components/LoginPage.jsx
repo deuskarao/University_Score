@@ -126,8 +126,8 @@ export default function LoginPage({ onSwitch }) {
         {/* Form */}
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 12 }}>
-            <label style={labelStyle}>E-posta</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@university.edu.tr" required style={inputStyle} {...focusHandlers} />
+            <label style={labelStyle}>E-posta veya Kullanıcı Adı</label>
+            <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@edu.tr veya kullaniciadi" required style={inputStyle} {...focusHandlers} />
           </div>
 
           <div style={{ marginBottom: 12 }}>

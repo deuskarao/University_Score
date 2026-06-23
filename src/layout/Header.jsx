@@ -157,6 +157,7 @@ export default function Header({ sidebarWidth, onOpenMobileSidebar, pageTitle })
                   <div style={{ fontSize: 13, fontWeight: 600, color: tokens.textPrimary }}>
                     {profile?.full_name || "Kullanıcı"}
                   </div>
+                  {profile?.username && <div style={{ fontSize: 11, color: tokens.primary, marginTop: 2, fontWeight: 600 }}>@{profile.username}</div>}
                   <div style={{ fontSize: 11, color: tokens.muted, marginTop: 2 }}>{user?.email}</div>
                 </div>
                 <button

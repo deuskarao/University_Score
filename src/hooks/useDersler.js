@@ -57,7 +57,31 @@ export function useDersler({ bolumProp, departmentId }) {
   const [bolumLoading, setBolumLoading] = useState(!bolumProp && !!departmentId);
   const [dersler, setDersler] = useState([]);
   const [dbLoading, setDbLoading] = useState(!!bolumProp);
-  const [aktifDonem, setAktifDonem] = useState("tumu");
+
+  const [aktifDonem, setAktifDonemLocal] = useState(() => {
+    if (profile?.aktif_program_donemi === 0) return "tumu";
+    if (profile?.aktif_program_donemi) return String(profile.aktif_program_donemi);
+    return "tumu";
+  });
+
+  useEffect(() => {
+    if (profile?.aktif_program_donemi !== undefined) {
+      if (profile.aktif_program_donemi === 0) setAktifDonemLocal("tumu");
+      else setAktifDonemLocal(String(profile.aktif_program_donemi));
+    }
+  }, [profile?.aktif_program_donemi]);
+
+  const setAktifDonem = useCallback(async (donem) => {
+    setAktifDonemLocal(donem);
+    if (!profile) return;
+    const dbVal = donem === "tumu" ? 0 : Number(donem);
+    if (dbVal === profile.aktif_program_donemi) return;
+    try {
+      await updateProfile({ aktif_program_donemi: dbVal });
+    } catch (e) {
+      console.error("Dönem güncellenirken hata:", e);
+    }
+  }, [profile, updateProfile]);
   const aktifProgramDonemi = profile?.aktif_program_donemi || 1;
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState(() => (bosDers ? { ...bosDers } : null));
