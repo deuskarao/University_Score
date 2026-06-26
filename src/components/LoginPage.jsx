@@ -19,7 +19,7 @@ const focusHandlers = {
 };
 
 export default function LoginPage({ onSwitch }) {
-  const { login, resetPassword } = useAuth();
+  const { login, loginWithGoogle, resetPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -180,7 +180,7 @@ export default function LoginPage({ onSwitch }) {
         </div>
 
         {/* Google Button */}
-        <button style={{
+        <button onClick={loginWithGoogle} style={{
           width: "100%", height: 42, borderRadius: 10,
           background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
           color: "#F8FAFC", cursor: "pointer", fontSize: 13, fontWeight: 500,

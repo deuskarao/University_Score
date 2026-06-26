@@ -20,7 +20,7 @@ const focusProps = {
 };
 
 export default function RegisterPage({ onSwitch }) {
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -238,7 +238,7 @@ export default function RegisterPage({ onSwitch }) {
         </div>
 
         {/* Google Button */}
-        <button style={{
+        <button onClick={loginWithGoogle} style={{
           width: "100%", height: 38, borderRadius: 10,
           background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
           color: "#F8FAFC", cursor: "pointer", fontSize: 12, fontWeight: 500,
