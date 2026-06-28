@@ -64,7 +64,7 @@ export default function AppShell({ bolumProp, departmentId }) {
   if (!d.profile) return <CenteredMessage text="Profil yükleniyor..." />;
   if (!d.bolum && authProfile?.department_id) return <CenteredMessage text="Bölüm bilgileri yükleniyor..." />;
 
-  const needsDepartment = authProfile?.role !== "admin" && !authProfile?.department_id;
+  const needsDepartment = authProfile?.role !== "admin" && !authProfile?.department_id && activePage !== "settings";
 
   const donemler = [
     { value: "tumu", label: "Tüm Dönemler", short: "Tümü" },
