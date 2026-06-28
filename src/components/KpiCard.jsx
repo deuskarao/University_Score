@@ -1,8 +1,11 @@
 import { useTheme } from "../theme/ThemeProvider";
 
-export default function KpiCard({ label, value, suffix, accent, icon, iconColor }) {
+export default function KpiCard({ label, value, suffix, accent, icon, iconColor, fraction, fractionTotal }) {
   const { tokens } = useTheme();
   const color = iconColor || accent || tokens.primary;
+
+  // Fraction modu: "19/23" şeklinde gösterim (geçilen/alınan)
+  const hasFraction = fraction !== undefined && fractionTotal !== undefined;
 
   return (
     <div
@@ -53,10 +56,23 @@ export default function KpiCard({ label, value, suffix, accent, icon, iconColor 
         )}
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-        <span style={{ fontSize: 28, fontWeight: 800, color: accent || tokens.textPrimary, letterSpacing: -0.5 }}>
-          {value}
-        </span>
-        {suffix && <span style={{ fontSize: 13, color: tokens.muted, fontWeight: 600 }}>{suffix}</span>}
+        {hasFraction ? (
+          <>
+            <span style={{ fontSize: 28, fontWeight: 800, color: accent || tokens.textPrimary, letterSpacing: -0.5 }}>
+              {fraction}
+            </span>
+            <span style={{ fontSize: 16, fontWeight: 600, color: tokens.muted, letterSpacing: -0.3 }}>
+              / {fractionTotal}
+            </span>
+          </>
+        ) : (
+          <>
+            <span style={{ fontSize: 28, fontWeight: 800, color: accent || tokens.textPrimary, letterSpacing: -0.5 }}>
+              {value}
+            </span>
+            {suffix && <span style={{ fontSize: 13, color: tokens.muted, fontWeight: 600 }}>{suffix}</span>}
+          </>
+        )}
       </div>
     </div>
   );
