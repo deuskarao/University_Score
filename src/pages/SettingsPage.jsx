@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 import { Overlay, useInputStyle, useWindowSize } from "../components/shared.jsx";
 import { useHedefGano } from "../hooks/useHedefGano";
+import DepartmentSelector from "../components/DepartmentSelector";
 
 function downloadFile(filename, content, mime) {
   const blob = new Blob([content], { type: mime });
@@ -108,9 +109,10 @@ export default function SettingsPage({ dersler, stats, bolum }) {
     try { await supabase.from("profiles").update({ theme_preference: m }).eq("id", user.id); } catch {}
   }
 
-  // Bölüm sıfırlama — artık özel modal ile onaylanıyor
+  // Bölüm sıfırlama — artık özel modal ile onaylanıyor, sonra DepartmentSelector açılır
   const [deptResetOpen, setDeptResetOpen] = useState(false);
   const [deptResetError, setDeptResetError] = useState("");
+  const [deptSelectOpen, setDeptSelectOpen] = useState(false); // Bölüm seçme modalı
 
   function handleResetDepartmentClick() {
     setDeptResetError("");
@@ -123,11 +125,33 @@ export default function SettingsPage({ dersler, stats, bolum }) {
     try {
       await updateProfile({ department_id: null, faculty_id: null, university_id: null });
       setDeptResetOpen(false);
+      // Onay sonrası bölüm seçme modalını aç
+      setDeptSelectOpen(true);
     } catch (e) {
       console.error(e);
       setDeptResetError(e?.message || "Bölüm değiştirilemedi. Lütfen tekrar deneyin.");
     } finally {
       setIsUpdatingDept(false);
+    }
+  }
+
+  // Bölüm seçme modalından gelen veriyi kaydet
+  async function handleDepartmentSelect(deptData) {
+    if (!deptData || !deptData.university_id || !deptData.faculty_id || !deptData.department_id) {
+      console.error("Eksik veri:", deptData);
+      return;
+    }
+    try {
+      await updateProfile({
+        university_id: deptData.university_id,
+        faculty_id: deptData.faculty_id,
+        department_id: deptData.department_id,
+      });
+      setDeptSelectOpen(false);
+      window.location.reload();
+    } catch (e) {
+      console.error("Kaydedilirken hata:", e);
+      alert("Bölüm kaydedilemedi: " + (e?.message || "Bilinmeyen hata"));
     }
   }
 
@@ -664,6 +688,51 @@ export default function SettingsPage({ dersler, stats, bolum }) {
                 )}
               </button>
             </div>
+          </div>
+        </Overlay>
+      )}
+
+      {/* Bölüm Seçme Modalı — "Bölümü Değiştir" onayından sonra açılır */}
+      {deptSelectOpen && (
+        <Overlay onClick={() => setDeptSelectOpen(false)}>
+          <div
+            style={{
+              background: tokens.card,
+              border: `1px solid ${tokens.border}`,
+              borderRadius: 20,
+              padding: "28px 28px 24px",
+              maxWidth: 720,
+              width: "95%",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: tokens.shadowLg,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+              <div>
+                <h3 style={{ color: tokens.textPrimary, margin: 0, fontSize: 18, fontWeight: 700 }}>
+                  Yeni Bölüm Seç
+                </h3>
+                <p style={{ color: tokens.muted, margin: "4px 0 0", fontSize: 12 }}>
+                  Üniversite → Fakülte → Bölüm seçerek devam et
+                </p>
+              </div>
+              <button
+                onClick={() => setDeptSelectOpen(false)}
+                style={{
+                  width: 30, height: 30, borderRadius: 8,
+                  background: tokens.surface, border: `1px solid ${tokens.border}`,
+                  color: tokens.muted, cursor: "pointer", fontSize: 14,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontFamily: "inherit",
+                }}
+              >✕</button>
+            </div>
+            <DepartmentSelector
+              tokens={tokens}
+              onSelect={handleDepartmentSelect}
+            />
           </div>
         </Overlay>
       )}

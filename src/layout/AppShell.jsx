@@ -11,7 +11,6 @@ import AnalyticsPage from "../pages/AnalyticsPage";
 import SettingsPage from "../pages/SettingsPage";
 import AdminPage from "../pages/AdminPage";
 import DepartmentPage from "../pages/DepartmentPage";
-import DepartmentSelector from "../components/DepartmentSelector";
 
 const PAGE_TITLES = {
   dashboard: "Ana Sayfa",
@@ -120,8 +119,46 @@ export default function AppShell({ bolumProp, departmentId }) {
         />
         <main style={{ padding: mobil ? "16px 16px 88px" : "24px 28px 40px" }}>
           {needsDepartment ? (
-            <div style={{ height: "60vh", display: "flex", alignItems: "center", justifyContent: "center", color: tokens.muted }}>
-              Bölümünüzü seçtikten sonra tüm özelliklere erişebilirsiniz.
+            <div style={{
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              minHeight: "60vh", gap: 16, textAlign: "center", padding: 24,
+            }}>
+              <div style={{
+                width: 72, height: 72, borderRadius: 20,
+                background: `linear-gradient(135deg, ${tokens.primary}, ${tokens.primaryHover})`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "#fff", fontSize: 32, boxShadow: `0 8px 24px ${tokens.primary}40`,
+              }}>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                  <path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/>
+                </svg>
+              </div>
+              <h2 style={{ color: tokens.textPrimary, margin: 0, fontSize: 22, fontWeight: 700 }}>
+                Hoş geldin! 👋
+              </h2>
+              <p style={{ color: tokens.muted, margin: 0, fontSize: 14, lineHeight: 1.5, maxWidth: 400 }}>
+                UniPulse'u kullanmaya başlamak için üniversite, fakülte ve bölümünü seç.
+                Sonra derslerini görüp notlarını takip edebilirsin.
+              </p>
+              <button
+                onClick={() => navigate("settings")}
+                style={{
+                  padding: "12px 28px", borderRadius: 12, border: "none",
+                  background: `linear-gradient(135deg, ${tokens.primary}, ${tokens.primaryHover})`,
+                  color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 14,
+                  fontFamily: "inherit", boxShadow: `0 8px 20px ${tokens.primary}35`,
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = `0 12px 28px ${tokens.primary}45`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 8px 20px ${tokens.primary}35`; }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/>
+                </svg>
+                Bölüm Seç
+              </button>
             </div>
           ) : (
             <>
@@ -198,45 +235,8 @@ export default function AppShell({ bolumProp, departmentId }) {
         </nav>
       )}
 
-      {/* Onboarding Overlay */}
-      {needsDepartment && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 9999,
-          background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
-          display: "flex", alignItems: "center", justifyContent: "center"
-        }}>
-          <div style={{
-            background: tokens.card, padding: 32, borderRadius: 24,
-            width: "90%", maxWidth: 460, border: `1px solid ${tokens.border}`,
-            boxShadow: tokens.shadowLg, maxHeight: "90vh", overflowY: "auto"
-          }}>
-            <h2 style={{ color: tokens.textPrimary, margin: "0 0 8px", fontSize: 22 }}>Hoş Geldiniz! 👋</h2>
-            <p style={{ color: tokens.muted, margin: "0 0 24px", fontSize: 13, lineHeight: 1.5 }}>
-              UniPulse'u kullanmaya başlamadan önce lütfen eğitim bilgilerinizi seçin.
-            </p>
-            <DepartmentSelector
-              tokens={tokens}
-              onSelect={async (deptData) => {
-                if (!deptData || !deptData.university_id || !deptData.faculty_id || !deptData.department_id) {
-                  console.error("Eksik veri:", deptData);
-                  return;
-                }
-                try {
-                  await updateProfile({
-                    university_id: deptData.university_id,
-                    faculty_id: deptData.faculty_id,
-                    department_id: deptData.department_id
-                  });
-                  window.location.reload();
-                } catch(e) {
-                  console.error("Kaydedilirken hata:", e);
-                  alert("Bölüm kaydedilemedi: " + (e?.message || "Bilinmeyen hata"));
-                }
-              }}
-            />
-          </div>
-        </div>
-      )}
+      {/* Onboarding Overlay kaldırıldı — kullanıcı bölümsüzse Dashboard'da
+          boş durum mesajı gösterilir, Settings'ten bölüm seçebilir. */}
     </div>
   );
 }
