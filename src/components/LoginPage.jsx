@@ -142,7 +142,7 @@ export default function LoginPage({ onSwitch }) {
 
           <div style={{ marginBottom: 16 }}>
             <label style={labelStyle}>Şifre</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} style={inputStyle} {...focusHandlers} />
+            <input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} style={inputStyle} {...focusHandlers} />
           </div>
 
           {/* Options */}

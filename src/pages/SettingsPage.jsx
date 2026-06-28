@@ -917,6 +917,7 @@ export default function SettingsPage({ dersler, stats, bolum }) {
                   </label>
                   <input
                     type="password"
+                    autoComplete="current-password"
                     value={currentPassword}
                     onChange={(e) => { setCurrentPassword(e.target.value); setPasswordError(""); }}
                     placeholder="••••••••"
@@ -938,6 +939,7 @@ export default function SettingsPage({ dersler, stats, bolum }) {
                   </label>
                   <input
                     type="password"
+                    autoComplete="new-password"
                     value={newPassword}
                     onChange={(e) => { setNewPassword(e.target.value); setPasswordError(""); }}
                     placeholder="••••••••"
@@ -959,6 +961,7 @@ export default function SettingsPage({ dersler, stats, bolum }) {
                   </label>
                   <input
                     type="password"
+                    autoComplete="new-password"
                     value={confirmPassword}
                     onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(""); }}
                     placeholder="••••••••"
