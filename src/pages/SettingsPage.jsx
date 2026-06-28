@@ -115,7 +115,10 @@ export default function SettingsPage({ dersler, stats, bolum }) {
   const [deptSelectOpen, setDeptSelectOpen] = useState(false); // Bölüm seçme modalı
 
   // Şifre değiştirme — Supabase auth.updateUser ile
+  // Not: Supabase yeni sürümde mevcut şifre doğrulaması istiyor.
+  // Çözüm: Önce signInWithPassword ile mevcut şifreyi doğrula, sonra updateUser çağır.
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -123,6 +126,7 @@ export default function SettingsPage({ dersler, stats, bolum }) {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   function handlePasswordChangeClick() {
+    setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
     setPasswordError("");
@@ -135,37 +139,55 @@ export default function SettingsPage({ dersler, stats, bolum }) {
     setPasswordError("");
 
     // Validasyon
+    if (!currentPassword) {
+      setPasswordError("Lütfen mevcut şifrenizi girin.");
+      return;
+    }
     if (!newPassword) {
       setPasswordError("Lütfen yeni şifrenizi girin.");
       return;
     }
     if (newPassword.length < 6) {
-      setPasswordError("Şifre en az 6 karakter olmalıdır.");
+      setPasswordError("Yeni şifre en az 6 karakter olmalıdır.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError("Şifreler eşleşmiyor.");
+      setPasswordError("Yeni şifreler eşleşmiyor.");
+      return;
+    }
+    if (currentPassword === newPassword) {
+      setPasswordError("Yeni şifre mevcut şifrenizden farklı olmalıdır.");
       return;
     }
 
     setPasswordLoading(true);
     try {
-      // Supabase Auth: şifre güncelleme
-      // Bu, auth.users tablosunda password_hash'i güvenli şekilde günceller
-      const { data, error } = await supabase.auth.updateUser({
+      // 1) Mevcut şifreyi doğrula (signInWithPassword)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        setPasswordError("Mevcut şifre hatalı.");
+        return;
+      }
+
+      // 2) Yeni şifreyi güncelle
+      const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
 
-      if (error) {
-        setPasswordError(error.message || "Şifre güncellenemedi.");
+      if (updateError) {
+        setPasswordError(updateError.message || "Şifre güncellenemedi.");
         return;
       }
 
       // Başarılı
       setPasswordSuccess(true);
+      setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      // 3 saniye sonra modalı kapat
       setTimeout(() => {
         setPasswordModalOpen(false);
         setPasswordSuccess(false);
@@ -883,8 +905,29 @@ export default function SettingsPage({ dersler, stats, bolum }) {
                   Şifre Değiştir
                 </h3>
                 <p style={{ color: tokens.muted, fontSize: 12, margin: "0 0 20px", lineHeight: 1.5 }}>
-                  Yeni şifrenizi belirleyin. En az 6 karakter olmalı.
+                  Güvenliğiniz için mevcut şifrenizi doğrulayın, sonra yeni şifrenizi belirleyin.
                 </p>
+
+                <div style={{ textAlign: "left", marginBottom: 12 }}>
+                  <label style={{
+                    display: "block", fontSize: 11, color: tokens.textSecondary,
+                    fontWeight: 600, marginBottom: 5, letterSpacing: "0.2px",
+                  }}>
+                    Mevcut Şifre
+                  </label>
+                  <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => { setCurrentPassword(e.target.value); setPasswordError(""); }}
+                    placeholder="••••••••"
+                    required
+                    autoFocus
+                    style={{
+                      ...inputStyle,
+                      ...(passwordError ? { borderColor: tokens.danger + "60", background: tokens.danger + "08" } : {}),
+                    }}
+                  />
+                </div>
 
                 <div style={{ textAlign: "left", marginBottom: 12 }}>
                   <label style={{
@@ -900,7 +943,6 @@ export default function SettingsPage({ dersler, stats, bolum }) {
                     placeholder="••••••••"
                     required
                     minLength={6}
-                    autoFocus
                     style={{
                       ...inputStyle,
                       ...(passwordError ? { borderColor: tokens.danger + "60", background: tokens.danger + "08" } : {}),

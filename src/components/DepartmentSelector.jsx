@@ -151,10 +151,30 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
   };
 
   // Bölüm seçilince: university_id, faculty_id, department_id objesi gönder
-  // AppShell bunu updateProfile ile profiles tablosuna yazar.
+  // AppShell/Settings bunu updateProfile ile profiles tablosuna yazar.
+  // NOT: selectedUni ve selectedFaculty state'inden doğrudan alınır.
   const handleDepartmentSelect = (deptId) => {
     const dept = departments.find(d => d.id === deptId);
-    if (!dept || !selectedUni || !selectedFaculty) return;
+    if (!dept) {
+      console.error("[DepartmentSelector] Bölüm bulunamadı:", deptId);
+      return;
+    }
+    if (!selectedUni) {
+      console.error("[DepartmentSelector] Üniversite seçilmemiş!");
+      return;
+    }
+    if (!selectedFaculty) {
+      console.error("[DepartmentSelector] Fakülte seçilmemiş!");
+      return;
+    }
+    console.log("[DepartmentSelector] Bölüm seçildi:", {
+      university_id: selectedUni.id,
+      university_ad: selectedUni.ad,
+      faculty_id: selectedFaculty.id,
+      faculty_ad: selectedFaculty.ad,
+      department_id: dept.id,
+      department_ad: dept.ad,
+    });
     onSelect({
       university_id: selectedUni.id,
       faculty_id: selectedFaculty.id,
@@ -162,12 +182,14 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
     });
   };
 
-  // Tek bölüm varsa otomatik seç (eski davranış)
+  // Tek bölüm varsa otomatik seç
   useEffect(() => {
     const dept = getSelectedDepartment();
-    if (dept) handleDepartmentSelect(dept.id);
+    if (dept && selectedUni && selectedFaculty) {
+      handleDepartmentSelect(dept.id);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFaculty, departments, facultyDepartments]);
+  }, [selectedFaculty, selectedUni, departments, facultyDepartments]);
 
   if (loading) {
     return (
