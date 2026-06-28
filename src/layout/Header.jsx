@@ -71,7 +71,7 @@ export default function Header({ sidebarWidth, onOpenMobileSidebar, pageTitle, d
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 24px",
+        padding: "0 24px 0 32px",
         background: tokens.surface,
         borderBottom: `1px solid ${tokens.border}`,
       }}

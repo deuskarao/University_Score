@@ -75,7 +75,7 @@ export default function AppShell({ bolumProp, departmentId }) {
     })) : []),
   ];
 
-  const sidebarWidth = mobil ? 0 : collapsed ? 72 : 220;
+  const sidebarWidth = mobil ? 0 : collapsed ? 72 : 200;
 
   return (
     <div style={{ minHeight: "100vh", background: tokens.background, fontFamily: "'Inter', system-ui, sans-serif" }}>

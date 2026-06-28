@@ -114,7 +114,7 @@ export default function Sidebar({
           left: 0,
           top: 0,
           bottom: 0,
-          width: collapsed ? 72 : 240,
+          width: collapsed ? 72 : 200,
           background: tokens.sidebar,
           borderRight: `1px solid ${tokens.border}`,
           display: "flex",
