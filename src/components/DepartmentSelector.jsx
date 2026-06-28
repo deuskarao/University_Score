@@ -147,10 +147,24 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
     return null;
   };
 
+  // Bölüm seçilince: university_id, faculty_id, department_id objesi gönder
+  // AppShell bunu updateProfile ile profiles tablosuna yazar.
+  const handleDepartmentSelect = (deptId) => {
+    const dept = departments.find(d => d.id === deptId);
+    if (!dept || !selectedUni || !selectedFaculty) return;
+    onSelect({
+      university_id: selectedUni.id,
+      faculty_id: selectedFaculty.id,
+      department_id: dept.id,
+    });
+  };
+
+  // Tek bölüm varsa otomatik seç (eski davranış)
   useEffect(() => {
     const dept = getSelectedDepartment();
-    if (dept) onSelect(dept.id);
-  }, [selectedFaculty, departments, facultyDepartments, onSelect]);
+    if (dept) handleDepartmentSelect(dept.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFaculty, departments, facultyDepartments]);
 
   if (loading) {
     return (
@@ -249,7 +263,7 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
                 transition={{ duration: 0.2, delay: i * 0.03 }}
                 className="rounded-xl p-4 cursor-pointer transition-all duration-200"
                 style={{ background: tokens.surface, border: `1px solid ${tokens.border}` }}
-                onClick={() => onSelect(d.id)}
+                onClick={() => handleDepartmentSelect(d.id)}
                 onMouseEnter={(e) => { e.currentTarget.style.background = tokens.success + "20"; e.currentTarget.style.borderColor = tokens.success + "50"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = tokens.surface; e.currentTarget.style.borderColor = tokens.border; }}
               >

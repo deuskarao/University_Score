@@ -217,7 +217,10 @@ export default function AppShell({ bolumProp, departmentId }) {
             <DepartmentSelector
               tokens={tokens}
               onSelect={async (deptData) => {
-                if (!deptData) return;
+                if (!deptData || !deptData.university_id || !deptData.faculty_id || !deptData.department_id) {
+                  console.error("Eksik veri:", deptData);
+                  return;
+                }
                 try {
                   await updateProfile({
                     university_id: deptData.university_id,
@@ -226,7 +229,8 @@ export default function AppShell({ bolumProp, departmentId }) {
                   });
                   window.location.reload();
                 } catch(e) {
-                  alert("Kaydedilirken hata oluştu");
+                  console.error("Kaydedilirken hata:", e);
+                  alert("Bölüm kaydedilemedi: " + (e?.message || "Bilinmeyen hata"));
                 }
               }}
             />
