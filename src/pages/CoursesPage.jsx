@@ -16,7 +16,7 @@ export default function CoursesPage({ bolum, profile, harfNotlari, harfRenk, sir
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Ders ara…" style={{ ...inputStyle, maxWidth: 280 }} />
-        {canEdit && !mobil && <button onClick={() => modalAc("ekle")} style={{ padding: "9px 18px", borderRadius: 10, border: "none", background: tokens.primary, color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 13 }}>+ Ders Ekle</button>}
+        {canEdit && !mobil && <button onClick={() => modalAc("ekle")} style={{ padding: "9px 18px", borderRadius: 10, border: "none", background: `linear-gradient(135deg, ${tokens.primary}, ${tokens.primaryHover})`, color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6, boxShadow: `0 4px 12px ${tokens.primary}30`, transition: "all 0.15s" }} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = `0 6px 16px ${tokens.primary}40`; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 12px ${tokens.primary}30`; }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Ders Ekle</button>}
       </div>
       <div style={{ background: tokens.card, border: `1px solid ${tokens.border}`, borderRadius: 16, overflow: "hidden", boxShadow: tokens.shadowSm }}>
         <div style={{ overflowX: "auto" }}>
@@ -53,8 +53,18 @@ export default function CoursesPage({ bolum, profile, harfNotlari, harfRenk, sir
                     <td style={{ padding: "12px 10px", textAlign: "center", fontSize: 13, fontWeight: 700, color: tokens.textSecondary }}>{(d.kredi * harf.katsayi).toFixed(2)}</td>
                     <td style={{ padding: "12px 10px", textAlign: "center" }}>
                       {canEdit && <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-                        <button onClick={() => modalAc("duzenle", d)} style={{ border: `1px solid ${tokens.primary}30`, background: tokens.primary + "12", color: tokens.primary, borderRadius: 8, padding: "5px 9px", cursor: "pointer", fontSize: 12 }}>✏️</button>
-                        <button onClick={() => setSilOnay(d.id)} style={{ border: `1px solid ${tokens.danger}30`, background: tokens.danger + "12", color: tokens.danger, borderRadius: 8, padding: "5px 9px", cursor: "pointer", fontSize: 12 }}>🗑</button>
+                        <button onClick={() => modalAc("duzenle", d)} title="Düzenle" style={{ border: `1px solid ${tokens.primary}30`, background: tokens.primary + "10", color: tokens.primary, borderRadius: 8, padding: "6px 9px", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = tokens.primary + "20"; e.currentTarget.style.borderColor = tokens.primary + "50"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = tokens.primary + "10"; e.currentTarget.style.borderColor = tokens.primary + "30"; }}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </button>
+                        <button onClick={() => setSilOnay(d.id)} title="Sil" style={{ border: `1px solid ${tokens.danger}30`, background: tokens.danger + "10", color: tokens.danger, borderRadius: 8, padding: "6px 9px", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = tokens.danger + "20"; e.currentTarget.style.borderColor = tokens.danger + "50"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = tokens.danger + "10"; e.currentTarget.style.borderColor = tokens.danger + "30"; }}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
                       </div>}
                     </td>
                   </tr>
@@ -67,7 +77,9 @@ export default function CoursesPage({ bolum, profile, harfNotlari, harfRenk, sir
       {silOnay && (
         <Overlay onClick={() => setSilOnay(null)}>
           <div style={{ background: tokens.card, border: `1px solid ${tokens.danger}40`, borderRadius: 18, padding: "32px 28px", maxWidth: 340, width: "90%", textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ fontSize: 36, marginBottom: 12 }}>🗑️</div>
+            <div style={{ width: 56, height: 56, borderRadius: 16, margin: "0 auto 16px", background: tokens.danger + "12", border: `1px solid ${tokens.danger}25`, display: "flex", alignItems: "center", justifyContent: "center", color: tokens.danger }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </div>
             <h3 style={{ color: tokens.textPrimary, margin: "0 0 8px", fontSize: 17 }}>Dersi Sil</h3>
             <p style={{ color: tokens.muted, fontSize: 13, margin: "0 0 24px" }}>Bu ders kalıcı olarak silinecek. Emin misin?</p>
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>

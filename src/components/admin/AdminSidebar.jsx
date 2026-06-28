@@ -60,30 +60,49 @@ export default function AdminSidebar({ activePage, onNavigate, collapsed, onTogg
             <div
               className="flex items-center"
               style={{
-                padding: collapsed ? "20px 0" : "20px 20px 16px",
+                padding: collapsed ? "18px 0" : "18px 18px 14px",
                 justifyContent: collapsed ? "center" : "space-between",
                 borderBottom: `1px solid ${tokens.border}`,
               }}
             >
               {!collapsed && (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <div
                     className="flex items-center justify-center"
                     style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      background: `linear-gradient(135deg, ${tokens.primary}, ${tokens.primary}cc)`,
+                      width: 30,
+                      height: 30,
+                      borderRadius: 9,
+                      background: `linear-gradient(135deg, ${tokens.primary}, ${tokens.primaryHover})`,
                       color: "#fff",
-                      fontWeight: 800,
-                      fontSize: 14,
+                      boxShadow: `0 4px 12px ${tokens.primary}40`,
                     }}
                   >
-                    A
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
                   </div>
-                  <span style={{ fontWeight: 700, fontSize: 16, color: tokens.textPrimary, letterSpacing: -0.3 }}>
-                    Admin
-                  </span>
+                  <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: tokens.textPrimary, letterSpacing: -0.3 }}>
+                      Admin
+                    </span>
+                    <span style={{ fontSize: 9, color: tokens.muted, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase" }}>UniPulse</span>
+                  </div>
+                </div>
+              )}
+              {collapsed && (
+                <div
+                  className="flex items-center justify-center"
+                  style={{
+                    width: 34, height: 34, borderRadius: 10,
+                    background: `linear-gradient(135deg, ${tokens.primary}, ${tokens.primaryHover})`,
+                    color: "#fff",
+                    boxShadow: `0 4px 12px ${tokens.primary}40`,
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
                 </div>
               )}
               <button
@@ -119,7 +138,7 @@ export default function AdminSidebar({ activePage, onNavigate, collapsed, onTogg
                     title={collapsed ? item.label : undefined}
                     className="flex items-center gap-3 w-full rounded-lg transition-all duration-150"
                     style={{
-                      padding: collapsed ? "10px 0" : "10px 12px",
+                      padding: collapsed ? "10px 0" : "9px 12px",
                       justifyContent: collapsed ? "center" : "flex-start",
                       background: active ? tokens.sidebarActive : "transparent",
                       color: active ? tokens.primary : tokens.textSecondary,
@@ -127,11 +146,19 @@ export default function AdminSidebar({ activePage, onNavigate, collapsed, onTogg
                       fontSize: 13,
                       cursor: "pointer",
                       border: "none",
+                      position: "relative",
+                      fontFamily: "inherit",
                     }}
-                    onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = tokens.sidebarHover; }}
-                    onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = "transparent"; }}
+                    onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = tokens.sidebarHover; e.currentTarget.style.color = tokens.textPrimary; } }}
+                    onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.textSecondary; } }}
                   >
-                    <span className="flex-shrink-0">{item.icon}</span>
+                    {active && !collapsed && (
+                      <span style={{
+                        position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)",
+                        width: 3, height: 18, background: tokens.primary, borderRadius: 0,
+                      }} />
+                    )}
+                    <span className="flex-shrink-0" style={{ color: active ? tokens.primary : "inherit" }}>{item.icon}</span>
                     {!collapsed && <span>{item.label}</span>}
                   </button>
                 );

@@ -220,13 +220,16 @@ export default function AdminHeader({ onOpenMobileSidebar, pageTitle, onBackToUs
             style={{
               width: 36,
               height: 36,
-              border: `1px solid ${tokens.border}`,
-              background: tokens.primary + "20",
+              border: `1px solid ${tokens.primary}30`,
+              background: `linear-gradient(135deg, ${tokens.primary}20, ${tokens.primary}10)`,
               color: tokens.primary,
               fontWeight: 700,
               fontSize: 13,
               cursor: "pointer",
+              transition: "all 0.15s ease",
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = tokens.primary + "50"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = tokens.primary + "30"; }}
           >
             {initial}
           </button>

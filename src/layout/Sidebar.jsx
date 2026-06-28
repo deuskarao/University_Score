@@ -1,14 +1,85 @@
 import { useTheme } from "../theme/ThemeProvider";
 
+const ICON = {
+  dashboard: (color = "currentColor") => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="9" rx="1.5"/>
+      <rect x="14" y="3" width="7" height="5" rx="1.5"/>
+      <rect x="14" y="12" width="7" height="9" rx="1.5"/>
+      <rect x="3" y="16" width="7" height="5" rx="1.5"/>
+    </svg>
+  ),
+  courses: (color = "currentColor") => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg>
+  ),
+  analytics: (color = "currentColor") => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10"/>
+      <line x1="12" y1="20" x2="12" y2="4"/>
+      <line x1="6" y1="20" x2="6" y2="14"/>
+    </svg>
+  ),
+  settings: (color = "currentColor") => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  ),
+  admin: (color = "currentColor") => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+  ),
+  departments: (color = "currentColor") => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 21h18"/>
+      <path d="M5 21V7l8-4v18"/>
+      <path d="M19 21V11l-6-4"/>
+      <line x1="9" y1="9" x2="9" y2="9.01"/>
+      <line x1="9" y1="12" x2="9" y2="12.01"/>
+      <line x1="9" y1="15" x2="9" y2="15.01"/>
+      <line x1="9" y1="18" x2="9" y2="18.01"/>
+    </svg>
+  ),
+};
+
 const NAV_ITEMS = [
-  { id: "dashboard", label: "Ana Sayfa", icon: "🏠" },
-  { id: "courses", label: "Dersler", icon: "📚" },
-  { id: "analytics", label: "Analitik", icon: "📊" },
-  { id: "settings", label: "Ayarlar", icon: "⚙️" },
+  { id: "dashboard", label: "Ana Sayfa", icon: ICON.dashboard },
+  { id: "courses", label: "Dersler", icon: ICON.courses },
+  { id: "analytics", label: "Analitik", icon: ICON.analytics },
+  { id: "settings", label: "Ayarlar", icon: ICON.settings },
 ];
 
-const ADMIN_ITEM = { id: "admin", label: "Admin Paneli", icon: "👑" };
-const DEPARTMENT_ITEM = { id: "departments", label: "Departmanlar", icon: "🏢" };
+const ADMIN_ITEM = { id: "admin", label: "Admin Paneli", icon: ICON.admin };
+const DEPARTMENT_ITEM = { id: "departments", label: "Departmanlar", icon: ICON.departments };
+
+function SidebarLogo({ tokens }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{
+        width: 30, height: 30, borderRadius: 9,
+        background: `linear-gradient(135deg, ${tokens.primary}, ${tokens.primaryHover})`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        boxShadow: `0 4px 12px ${tokens.primary}40`,
+      }}>
+        <svg width="18" height="18" viewBox="0 0 64 64" fill="none">
+          <polyline points="6,34 16,34 22,20 28,48 34,26 38,38 44,30 50,34 58,34"
+            fill="none" stroke="white" strokeWidth="5"
+            strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      <span style={{
+        fontWeight: 700, fontSize: 16, color: tokens.textPrimary,
+        letterSpacing: -0.3,
+      }}>
+        UniPulse
+      </span>
+    </div>
+  );
+}
 
 export default function Sidebar({
   activePage,
@@ -23,15 +94,18 @@ export default function Sidebar({
   isAdmin,
 }) {
   const { tokens } = useTheme();
-  
+
   const navItems = isAdmin ? [...NAV_ITEMS, ADMIN_ITEM, DEPARTMENT_ITEM] : NAV_ITEMS;
+  // Admin & departments go into a separate "Yönetim" group
+  const primaryNav = NAV_ITEMS;
+  const adminNav = isAdmin ? [ADMIN_ITEM, DEPARTMENT_ITEM] : [];
 
   return (
     <>
       {mobileOpen && (
         <div
           onClick={onCloseMobile}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 199 }}
+          style={{ position: "fixed", inset: 0, background: "rgba(7,11,20,0.6)", backdropFilter: "blur(4px)", zIndex: 199 }}
         />
       )}
       <aside
@@ -40,7 +114,7 @@ export default function Sidebar({
           left: 0,
           top: 0,
           bottom: 0,
-          width: collapsed ? 72 : 220,
+          width: collapsed ? 72 : 240,
           background: tokens.sidebar,
           borderRight: `1px solid ${tokens.border}`,
           display: "flex",
@@ -51,83 +125,126 @@ export default function Sidebar({
         }}
         className="up-sidebar"
       >
+        {/* Brand header */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: collapsed ? "center" : "space-between",
-            padding: collapsed ? "20px 0" : "20px 20px 16px",
+            padding: collapsed ? "18px 0" : "18px 18px 14px",
             borderBottom: `1px solid ${tokens.border}`,
           }}
         >
-          {!collapsed && (
-            <span style={{ fontWeight: 700, fontSize: 16, color: tokens.textPrimary, letterSpacing: -0.3 }}>
-              UniPulse
-            </span>
+          {!collapsed ? (
+            <SidebarLogo tokens={tokens} />
+          ) : (
+            <div style={{
+              width: 34, height: 34, borderRadius: 10,
+              background: `linear-gradient(135deg, ${tokens.primary}, ${tokens.primaryHover})`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: `0 4px 12px ${tokens.primary}40`,
+            }}>
+              <svg width="20" height="20" viewBox="0 0 64 64" fill="none">
+                <polyline points="6,34 16,34 22,20 28,48 34,26 38,38 44,30 50,34 58,34"
+                  fill="none" stroke="white" strokeWidth="5"
+                  strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
           )}
-          <button
-            onClick={onToggleCollapsed}
-            aria-label="Kenar çubuğunu aç/kapat"
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              border: `1px solid ${tokens.border}`,
-              background: "transparent",
-              color: tokens.muted,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 13,
-            }}
-          >
-            {collapsed ? "›" : "‹"}
-          </button>
+          {!collapsed && (
+            <button
+              onClick={onToggleCollapsed}
+              aria-label="Kenar çubuğunu daralt"
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 8,
+                border: `1px solid ${tokens.border}`,
+                background: "transparent",
+                color: tokens.muted,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = tokens.textPrimary; e.currentTarget.style.borderColor = tokens.primary + "40"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = tokens.muted; e.currentTarget.style.borderColor = tokens.border; }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+          )}
         </div>
 
-        <nav style={{ flex: 1, padding: "12px 12px", display: "flex", flexDirection: "column", gap: 4 }}>
-          {navItems.map((item) => {
-            const active = activePage === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  onNavigate(item.id);
-                  onCloseMobile?.();
-                }}
-                title={collapsed ? item.label : undefined}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  justifyContent: collapsed ? "center" : "flex-start",
-                  padding: collapsed ? "10px 0" : "10px 12px",
-                  borderRadius: 10,
-                  border: "none",
-                  background: active ? tokens.sidebarActive : "transparent",
-                  color: active ? tokens.primary : tokens.textSecondary,
-                  fontWeight: active ? 600 : 500,
-                  fontSize: 14,
-                  cursor: "pointer",
-                  transition: "background 150ms ease, color 150ms ease",
-                }}
-                onMouseEnter={(e) => {
-                  if (!active) e.currentTarget.style.background = tokens.sidebarHover;
-                }}
-                onMouseLeave={(e) => {
-                  if (!active) e.currentTarget.style.background = "transparent";
-                }}
-              >
-                <span style={{ fontSize: 16, lineHeight: 1 }}>{item.icon}</span>
-                {!collapsed && <span>{item.label}</span>}
-              </button>
-            );
-          })}
+        {/* Expanded toggle when collapsed */}
+        {collapsed && (
+          <button
+            onClick={onToggleCollapsed}
+            aria-label="Kenar çubuğunu genişlet"
+            style={{
+              margin: "8px auto 0",
+              width: 28, height: 28, borderRadius: 8,
+              border: `1px solid ${tokens.border}`,
+              background: "transparent",
+              color: tokens.muted, cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        )}
+
+        {/* Primary Nav */}
+        <nav style={{ flex: 1, padding: "14px 12px", display: "flex", flexDirection: "column", gap: 2 }}>
+          {!collapsed && (
+            <div style={{
+              fontSize: 10, fontWeight: 700, color: tokens.muted,
+              textTransform: "uppercase", letterSpacing: 0.8,
+              padding: "0 8px 8px",
+            }}>Menü</div>
+          )}
+          {primaryNav.map((item) => (
+            <NavButton
+              key={item.id}
+              item={item}
+              active={activePage === item.id}
+              collapsed={collapsed}
+              tokens={tokens}
+              onClick={() => { onNavigate(item.id); onCloseMobile?.(); }}
+            />
+          ))}
+
+          {adminNav.length > 0 && (
+            <>
+              {!collapsed && (
+                <div style={{
+                  fontSize: 10, fontWeight: 700, color: tokens.muted,
+                  textTransform: "uppercase", letterSpacing: 0.8,
+                  padding: "16px 8px 8px",
+                }}>Yönetim</div>
+              )}
+              {collapsed && <div style={{ height: 8 }} />}
+              {adminNav.map((item) => (
+                <NavButton
+                  key={item.id}
+                  item={item}
+                  active={activePage === item.id}
+                  collapsed={collapsed}
+                  tokens={tokens}
+                  onClick={() => { onNavigate(item.id); onCloseMobile?.(); }}
+                />
+              ))}
+            </>
+          )}
         </nav>
 
+        {/* Dönem seçici */}
         {donemler && (
-          <div style={{ padding: collapsed ? "12px 8px" : "12px 16px 20px", borderTop: `1px solid ${tokens.border}` }}>
+          <div style={{ padding: collapsed ? "10px 8px 16px" : "10px 16px 18px", borderTop: `1px solid ${tokens.border}` }}>
             {!collapsed && (
               <div
                 style={{
@@ -142,32 +259,98 @@ export default function Sidebar({
                 Dönem
               </div>
             )}
-            <select
-              value={aktifDonem}
-              onChange={(e) => onDonemChange(e.target.value)}
-              title="Dönem Seç"
-              style={{
-                width: "100%",
-                padding: collapsed ? "8px 4px" : "9px 10px",
-                borderRadius: 10,
-                border: `1px solid ${tokens.border}`,
-                background: tokens.surface,
-                color: tokens.textPrimary,
-                fontSize: 13,
-                fontWeight: 500,
-                outline: "none",
-                cursor: "pointer",
-              }}
-            >
-              {donemler.map((d) => (
-                <option key={d.value} value={d.value}>
-                  {collapsed ? d.short : d.label}
-                </option>
-              ))}
-            </select>
+            <div style={{ position: "relative" }}>
+              <select
+                value={aktifDonem}
+                onChange={(e) => onDonemChange(e.target.value)}
+                title="Dönem Seç"
+                style={{
+                  width: "100%",
+                  padding: collapsed ? "8px 4px" : "9px 28px 9px 12px",
+                  borderRadius: 10,
+                  border: `1px solid ${tokens.border}`,
+                  background: tokens.surface,
+                  color: tokens.textPrimary,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  outline: "none",
+                  cursor: "pointer",
+                  appearance: "none",
+                  fontFamily: "inherit",
+                }}
+              >
+                {donemler.map((d) => (
+                  <option key={d.value} value={d.value}>
+                    {collapsed ? d.short : d.label}
+                  </option>
+                ))}
+              </select>
+              {!collapsed && (
+                <div style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: tokens.muted }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </aside>
     </>
+  );
+}
+
+function NavButton({ item, active, collapsed, tokens, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      title={collapsed ? item.label : undefined}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        justifyContent: collapsed ? "center" : "flex-start",
+        padding: collapsed ? "10px 0" : "9px 12px",
+        borderRadius: 10,
+        border: "none",
+        background: active ? tokens.sidebarActive : "transparent",
+        color: active ? tokens.primary : tokens.textSecondary,
+        fontWeight: active ? 600 : 500,
+        fontSize: 14,
+        cursor: "pointer",
+        transition: "background 150ms ease, color 150ms ease",
+        position: "relative",
+        fontFamily: "inherit",
+      }}
+      onMouseEnter={(e) => {
+        if (!active) {
+          e.currentTarget.style.background = tokens.sidebarHover;
+          e.currentTarget.style.color = tokens.textPrimary;
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!active) {
+          e.currentTarget.style.background = "transparent";
+          e.currentTarget.style.color = tokens.textSecondary;
+        }
+      }}
+    >
+      {active && !collapsed && (
+        <span style={{
+          position: "absolute",
+          left: 0,
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: 3,
+          height: 18,
+          borderRadius: 0,
+          background: tokens.primary,
+        }} />
+      )}
+      <span style={{ display: "flex", flexShrink: 0, color: active ? tokens.primary : "inherit" }}>
+        {item.icon(active ? tokens.primary : undefined)}
+      </span>
+      {!collapsed && <span>{item.label}</span>}
+    </button>
   );
 }

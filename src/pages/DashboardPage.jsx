@@ -9,8 +9,11 @@ import { hesaplaDönemOrt, hesaplaHarf } from "../hooks/useDersler";
 function SectionCard({ title, children }) {
   const { tokens } = useTheme();
   return (
-    <div style={{ background: tokens.card, border: `1px solid ${tokens.border}`, borderRadius: 16, padding: "20px 22px", boxShadow: tokens.shadowSm }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: tokens.textPrimary, marginBottom: 16 }}>{title}</div>
+    <div style={{ background: tokens.card, border: `1px solid ${tokens.border}`, borderRadius: 16, padding: "22px 24px", boxShadow: tokens.shadowSm, transition: "box-shadow 0.2s ease" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
+        <div style={{ width: 3, height: 14, background: `linear-gradient(180deg, ${tokens.primary}, ${tokens.primaryHover})`, borderRadius: 2 }} />
+        <div style={{ fontSize: 13.5, fontWeight: 700, color: tokens.textPrimary, letterSpacing: -0.1 }}>{title}</div>
+      </div>
       {children}
     </div>
   );
@@ -48,10 +51,10 @@ export default function DashboardPage({ dersler, stats, harfNotlari, bolum }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
-        <KpiCard label="GPA" value={stats.gano} suffix="/ 4.00" accent={tokens.primary} icon="🎓" />
-        <KpiCard label="Toplam Ders" value={stats.toplam} icon="📘" />
-        <KpiCard label="Geçilen Dersler" value={stats.gecen} accent={tokens.success} icon="✅" />
-        <KpiCard label="Kalan Kredi" value={stats.kalanKredi} icon="⏳" />
+        <KpiCard label="GPA" value={stats.gano} suffix="/ 4.00" accent={tokens.primary} iconColor={tokens.primary} icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>} />
+        <KpiCard label="Toplam Ders" value={stats.toplam} iconColor={tokens.textSecondary} icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>} />
+        <KpiCard label="Geçilen Dersler" value={stats.gecen} accent={tokens.success} iconColor={tokens.success} icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>} />
+        <KpiCard label="Kalan Kredi" value={stats.kalanKredi} iconColor={tokens.warning} icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>} />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
         <SectionCard title="GPA Trendi"><GpaTrendChart data={gpaTrendData} /></SectionCard>
@@ -67,7 +70,7 @@ export default function DashboardPage({ dersler, stats, harfNotlari, bolum }) {
       </SectionCard>
       <SectionCard title="Performans Analizi">
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
-          <PerformanceList title="Riskli Dersler" items={riskli} tone="danger" emptyText="Riskli ders yok 🎉" />
+          <PerformanceList title="Riskli Dersler" items={riskli} tone="danger" emptyText="Riskli ders yok" />
           <PerformanceList title="Geçmeye Yakın" items={yaklasan} tone="warning" emptyText="Bu kategoride ders yok" />
           <PerformanceList title="Güçlü Dersler" items={guclu} tone="success" emptyText="Henüz veri yok" />
         </div>

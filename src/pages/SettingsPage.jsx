@@ -123,9 +123,9 @@ export default function SettingsPage({ dersler, stats, bolum }) {
   const initials = (profile?.full_name || user?.email || "?")[0]?.toUpperCase() || "?";
 
   const infoItems = [
-    { icon: "🏛️", label: "Üniversite", value: universityName },
-    { icon: "🎓", label: "Fakülte", value: facultyName },
-    { icon: "📚", label: "Bölüm", value: bolum?.ad || profile?.department_id ? (bolum?.ad || "Yükleniyor…") : null },
+    { icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>, label: "Üniversite", value: universityName },
+    { icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>, label: "Fakülte", value: facultyName },
+    { icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>, label: "Bölüm", value: bolum?.ad || profile?.department_id ? (bolum?.ad || "Yükleniyor…") : null },
   ];
 
   return (
@@ -301,10 +301,10 @@ export default function SettingsPage({ dersler, stats, bolum }) {
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
           {[
-            { label: "Üniversite", value: universityName, icon: "🏛️" },
-            { label: "Fakülte", value: facultyName, icon: "🎓" },
-            { label: "Bölüm", value: bolum?.ad, icon: "📚" },
-            { label: "Hesap Tipi", value: profile?.role === "admin" ? "Admin" : "Öğrenci", icon: "🔑" },
+            { label: "Üniversite", value: universityName, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg> },
+            { label: "Fakülte", value: facultyName, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg> },
+            { label: "Bölüm", value: bolum?.ad, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> },
+            { label: "Hesap Tipi", value: profile?.role === "admin" ? "Admin" : "Öğrenci", icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> },
           ].map((item, i) => (
             <div key={i} style={{
               padding: "16px 22px",
@@ -325,7 +325,9 @@ export default function SettingsPage({ dersler, stats, bolum }) {
       {usernameModal && (
         <Overlay onClick={() => setUsernameModal(false)}>
           <div style={{ background: tokens.card, border: `1px solid ${tokens.border}`, borderRadius: 20, padding: 28, maxWidth: 400, width: "90%", textAlign: "center", boxShadow: tokens.shadowLg }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ fontSize: 36, marginBottom: 16 }}>👤</div>
+            <div style={{ width: 56, height: 56, borderRadius: 16, background: tokens.primary + "12", border: `1px solid ${tokens.primary}25`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: tokens.primary }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
             <h3 style={{ color: tokens.textPrimary, margin: "0 0 8px", fontSize: 19 }}>Kullanıcı Adı Belirle</h3>
             <p style={{ color: tokens.muted, fontSize: 13, margin: "0 0 24px" }}>Sadece harf, rakam, alt çizgi ve nokta kullanabilirsiniz.</p>
             <input 
