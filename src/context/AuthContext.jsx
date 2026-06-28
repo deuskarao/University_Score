@@ -235,14 +235,25 @@ export function AuthProvider({ children }) {
   }
 
   async function updateProfile(updates) {
-    if (!user) return;
+    console.log("[AuthContext] updateProfile çağrıldı:", { user: user?.id, updates });
+    if (!user) {
+      console.error("[AuthContext] updateProfile: user null!");
+      return;
+    }
     setProfile(prev => prev ? { ...prev, ...updates } : prev);
-    const { error } = await supabase
+    console.log("[AuthContext] DB'ye yazılıyor:", updates);
+    const { data, error } = await supabase
       .from("profiles")
       .update(updates)
-      .eq("id", user.id);
-    if (error) throw error;
+      .eq("id", user.id)
+      .select("*");
+    if (error) {
+      console.error("[AuthContext] DB update hatası:", error);
+      throw error;
+    }
+    console.log("[AuthContext] DB update sonucu:", data);
     await fetchProfile(user.id);
+    console.log("[AuthContext] fetchProfile tamamlandı");
   }
 
   async function selectDepartment(deptId) {
