@@ -222,23 +222,18 @@ export default function SettingsPage({ dersler, stats, bolum }) {
   }
 
   // Bölüm seçme modalından gelen veriyi kaydet
+  // DepartmentSelector zaten doğrudan DB'ye yazdı, burada sadece reload yapıyoruz
   async function handleDepartmentSelect(deptData) {
     if (!deptData || !deptData.university_id || !deptData.faculty_id || !deptData.department_id) {
-      console.error("Eksik veri:", deptData);
+      console.error("[Settings] Eksik veri:", deptData);
       return;
     }
-    try {
-      await updateProfile({
-        university_id: deptData.university_id,
-        faculty_id: deptData.faculty_id,
-        department_id: deptData.department_id,
-      });
-      setDeptSelectOpen(false);
+    console.log("[Settings] Bölüm seçildi, modal kapatılıp sayfa yenileniyor:", deptData);
+    setDeptSelectOpen(false);
+    // Kısa gecikme — modal kapanması için, sonra reload
+    setTimeout(() => {
       window.location.reload();
-    } catch (e) {
-      console.error("Kaydedilirken hata:", e);
-      alert("Bölüm kaydedilemedi: " + (e?.message || "Bilinmeyen hata"));
-    }
+    }, 100);
   }
 
   function openUsernameModal() {

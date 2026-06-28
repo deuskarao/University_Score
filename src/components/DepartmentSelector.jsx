@@ -156,14 +156,17 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
     const dept = departments.find(d => d.id === deptId);
     if (!dept) {
       console.error("[DepartmentSelector] Bölüm bulunamadı:", deptId);
+      alert("Hata: Bölüm bulunamadı!");
       return;
     }
     if (!selectedUni) {
       console.error("[DepartmentSelector] Üniversite seçilmemiş!");
+      alert("Hata: Üniversite seçilmemiş!");
       return;
     }
     if (!selectedFaculty) {
       console.error("[DepartmentSelector] Fakülte seçilmemiş!");
+      alert("Hata: Fakülte seçilmemiş!");
       return;
     }
 
@@ -172,32 +175,57 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
       faculty_id: selectedFaculty.id,
       department_id: dept.id,
     };
-    console.log("[DepartmentSelector] Bölüm seçildi, DB'ye yazılıyor:", payload);
+    console.log("[DepartmentSelector] Bölüm seçildi:", dept.ad);
+    console.log("[DepartmentSelector] Üniversite:", selectedUni.ad, "→", selectedUni.id);
+    console.log("[DepartmentSelector] Fakülte:", selectedFaculty.ad, "→", selectedFaculty.id);
+    console.log("[DepartmentSelector] Bölüm:", dept.ad, "→", dept.id);
+    console.log("[DepartmentSelector] DB'ye yazılıyor:", payload);
 
-    // 1) Doğrudan DB'ye yaz (auth token ile, RLS sayesinde kendi profiline)
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error("[DepartmentSelector] Kullanıcı girişi yok!");
-        return;
-      }
-      const { error } = await supabase
-        .from("profiles")
-        .update(payload)
-        .eq("id", user.id);
-      if (error) {
-        console.error("[DepartmentSelector] DB update hatası:", error);
-        alert("Bölüm kaydedilemedi: " + error.message);
-        return;
-      }
-      console.log("[DepartmentSelector] DB'ye yazıldı ✓");
-    } catch (err) {
-      console.error("[DepartmentSelector] Exception:", err);
-      alert("Bölüm kaydedilemedi: " + (err?.message || "Bilinmeyen hata"));
+    // 1) Kullanıcı ID'sini al
+    const { data: { user }, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !user) {
+      console.error("[DepartmentSelector] Kullanıcı girişi yok!", userErr);
+      alert("Hata: Giriş yapılmamış. Lütfen tekrar giriş yapın.");
+      return;
+    }
+    console.log("[DepartmentSelector] Kullanıcı ID:", user.id);
+
+    // 2) DB'ye yaz (update + select ile doğrula)
+    const { data: updated, error: updateErr } = await supabase
+      .from("profiles")
+      .update(payload)
+      .eq("id", user.id)
+      .select("university_id, faculty_id, department_id");
+
+    if (updateErr) {
+      console.error("[DepartmentSelector] DB update hatası:", updateErr);
+      alert("Bölüm kaydedilemedi: " + updateErr.message);
       return;
     }
 
-    // 2) Callback çağır (reload için)
+    // 3) Doğrula — update gerçekten oldu mu?
+    if (!updated || updated.length === 0) {
+      console.error("[DepartmentSelector] Update 0 satır etkiledi! Profile kaydı yok.");
+      alert("Hata: Profil kaydınız bulunamadı. Lütfen destek ile iletişime geçin.");
+      return;
+    }
+
+    const result = updated[0];
+    console.log("[DepartmentSelector] DB doğrulama:", result);
+    if (result.university_id !== payload.university_id) {
+      console.error("[DepartmentSelector] university_id kaydedilmemiş!", result);
+      alert("Hata: Üniversite kaydedilemedi.");
+      return;
+    }
+    if (result.faculty_id !== payload.faculty_id) {
+      console.error("[DepartmentSelector] faculty_id kaydedilmemiş!", result);
+      alert("Hata: Fakülte kaydedilemedi.");
+      return;
+    }
+
+    console.log("[DepartmentSelector] ✓ DB'ye yazıldı ve doğrulandı");
+
+    // 4) Callback çağır (reload için)
     if (onSelect) {
       onSelect(payload);
     }
