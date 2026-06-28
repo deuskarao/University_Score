@@ -4,10 +4,13 @@ import { supabase } from "../lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * Üniversite logosu — Clearbit Logo API ile domain'den otomatik çekilir.
+ * Üniversite logosu — Google Favicon API ile domain'den otomatik çekilir.
  * Logo yüklenemezse emoji fallback gösterilir.
  *
- * Örn: domain="itu.edu.tr" → https://logo.clearbit.com/itu.edu.tr
+ * Google Favicon API: https://www.google.com/s2/favicons?domain={domain}&sz=64
+ * - Clearbit'ten daha güvenilir (Google'ın altyapısı)
+ * - Daha küçük resimler ama yeterli (36px için ideal)
+ * - Tüm Türk .edu.tr domainlerini tanır
  */
 function UniversityLogo({ university, size = 36 }) {
   const { tokens } = useTheme();
@@ -27,13 +30,14 @@ function UniversityLogo({ university, size = 36 }) {
         }}
       >
         <img
-          src={`https://logo.clearbit.com/${domain}`}
+          src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
           alt={university.ad}
           width={size - 8}
           height={size - 8}
-          style={{ objectFit: "contain", padding: 4 }}
+          style={{ objectFit: "contain" }}
           onError={() => setLogoError(true)}
           loading="lazy"
+          referrerPolicy="no-referrer"
         />
       </div>
     );

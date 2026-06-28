@@ -259,20 +259,6 @@ export default function DashboardPage({ dersler, stats, harfNotlari, bolum, akti
             border: `1px solid ${tokens.border}`,
             display: "flex", flexDirection: "column", gap: 14,
           }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 12, color: tokens.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>İlerleme</span>
-              <div style={{ display: "flex", gap: 10, fontSize: 11, fontWeight: 700 }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 4, color: tokens.primary }}>
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: tokens.primary, display: "inline-block" }} />
-                  {genelGano.toFixed(2)}
-                </span>
-                <span style={{ display: "flex", alignItems: "center", gap: 4, color: tokens.success }}>
-                  <span style={{ width: 8, height: 8, borderRadius: 1, background: tokens.success, display: "inline-block" }} />
-                  {hedefGano.toFixed(2)}
-                </span>
-              </div>
-            </div>
-
             {/* Bar — iki işaretçi ile */}
             <div style={{ position: "relative", height: 14, padding: "0 4px" }}>
               {/* Track */}

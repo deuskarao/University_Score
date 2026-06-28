@@ -39,39 +39,62 @@ export default function SettingsPage({ dersler, stats, bolum }) {
       const fetches = [];
 
       // Fakülte: önce profile.faculty_id'den dene, yoksa faculty_departments üzerinden bul
+      // === Üniversite ===
+      if (profile?.university_id) {
+        fetches.push(
+          supabase.from("universities").select("ad").eq("id", profile.university_id).maybeSingle()
+            .then(({ data }) => { if (data) setUniversityName(data.ad); })
+        );
+      }
+
+      // === Fakülte ===
+      // Öncelik 1: profile.faculty_id (kullanıcının seçtiği fakülte)
       if (profile?.faculty_id) {
         fetches.push(
           supabase.from("faculties").select("ad").eq("id", profile.faculty_id).maybeSingle()
             .then(({ data }) => { if (data) setFacultyName(data.ad); })
         );
-      } else if (profile?.department_id) {
-        fetches.push(
-          supabase
-            .from("faculty_departments")
-            .select("faculties!inner(ad)")
-            .eq("department_id", profile.department_id)
-            .maybeSingle()
-            .then(({ data }) => {
-              if (data?.faculties) setFacultyName(data.faculties.ad);
-              else {
-                // department_slug üzerinden dene
-                supabase.from("departments").select("slug").eq("id", profile.department_id).maybeSingle()
-                  .then(({ data: dept }) => {
-                    if (!dept) return;
-                    supabase.from("faculty_departments").select("faculties!inner(ad)")
-                      .eq("department_slug", dept.slug).maybeSingle()
-                      .then(({ data: fd }) => { if (fd?.faculties) setFacultyName(fd.faculties.ad); });
-                  });
-              }
-            })
-        );
       }
-
-      // Üniversite: profile.university_id'den çek
-      if (profile?.university_id) {
+      // Öncelik 2: department_id → department_slug → faculty_departments'tan ilk fakülte
+      else if (profile?.department_id) {
         fetches.push(
-          supabase.from("universities").select("ad").eq("id", profile.university_id).maybeSingle()
-            .then(({ data }) => { if (data) setUniversityName(data.ad); })
+          (async () => {
+            try {
+              // Önce department slug'ını bul
+              const { data: dept } = await supabase
+                .from("departments")
+                .select("slug, ad")
+                .eq("id", profile.department_id)
+                .maybeSingle();
+
+              if (!dept) return;
+
+              // Bu slug'a sahip ilk faculty_departments kaydını al
+              const { data: fd } = await supabase
+                .from("faculty_departments")
+                .select("faculty_id, faculties!inner(ad)")
+                .eq("department_slug", dept.slug)
+                .limit(1)
+                .maybeSingle();
+
+              if (fd?.faculties) {
+                setFacultyName(fd.faculties.ad);
+                // Eğer university_id yoksa, fakülteden üniversiteyi de öğren
+                if (!profile?.university_id && fd.faculty_id) {
+                  const { data: fac } = await supabase
+                    .from("faculties")
+                    .select("university_id, universities!inner(ad)")
+                    .eq("id", fd.faculty_id)
+                    .maybeSingle();
+                  if (fac?.universities?.ad) {
+                    setUniversityName(fac.universities.ad);
+                  }
+                }
+              }
+            } catch (err) {
+              console.error("Fakülte bilgisi yüklenemedi:", err);
+            }
+          })()
         );
       }
 
