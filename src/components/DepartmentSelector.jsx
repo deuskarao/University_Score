@@ -3,6 +3,58 @@ import { useTheme } from "../theme/ThemeProvider";
 import { supabase } from "../lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 
+/**
+ * Üniversite logosu — Clearbit Logo API ile domain'den otomatik çekilir.
+ * Logo yüklenemezse emoji fallback gösterilir.
+ *
+ * Örn: domain="itu.edu.tr" → https://logo.clearbit.com/itu.edu.tr
+ */
+function UniversityLogo({ university, size = 36 }) {
+  const { tokens } = useTheme();
+  const [logoError, setLogoError] = useState(false);
+  const domain = university?.domain;
+
+  // Logo varsa ve hata yoksa: <img>
+  if (domain && !logoError) {
+    return (
+      <div
+        className="flex items-center justify-center rounded-lg overflow-hidden"
+        style={{
+          width: size, height: size,
+          background: "#fff",
+          border: `1px solid ${tokens.border}`,
+          flexShrink: 0,
+        }}
+      >
+        <img
+          src={`https://logo.clearbit.com/${domain}`}
+          alt={university.ad}
+          width={size - 8}
+          height={size - 8}
+          style={{ objectFit: "contain", padding: 4 }}
+          onError={() => setLogoError(true)}
+          loading="lazy"
+        />
+      </div>
+    );
+  }
+
+  // Fallback: emoji (eski davranış)
+  return (
+    <div
+      className="flex items-center justify-center rounded-lg"
+      style={{
+        width: size, height: size,
+        background: (university.renk || tokens.primary) + "18",
+        fontSize: size * 0.5,
+        flexShrink: 0,
+      }}
+    >
+      {university.emoji || "🏛️"}
+    </div>
+  );
+}
+
 export default function DepartmentSelector({ onSelect, initialValue = null, tokens }) {
   const [universities, setUniversities] = useState([]);
   const [faculties, setFaculties] = useState([]);
@@ -83,9 +135,14 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
   return (
     <div className="rounded-xl p-5" style={{ background: tokens.card, border: `1px solid ${tokens.border}` }}>
       <div className="flex items-center justify-between mb-4">
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: tokens.textPrimary }}>Bölüm Seçimi</div>
-          <div style={{ fontSize: 11, color: tokens.muted }}>{getDisplayName()}</div>
+        <div className="flex items-center gap-3">
+          {selectedUni && (
+            <UniversityLogo university={selectedUni} size={32} />
+          )}
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: tokens.textPrimary }}>Bölüm Seçimi</div>
+            <div style={{ fontSize: 11, color: tokens.muted }}>{getDisplayName()}</div>
+          </div>
         </div>
         {(selectedUni || selectedFaculty) && (
           <button
@@ -114,12 +171,7 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
                 onMouseLeave={(e) => { e.currentTarget.style.background = tokens.surface; e.currentTarget.style.borderColor = tokens.border; }}
               >
                 <div className="flex items-center gap-3">
-                  <div
-                    className="flex items-center justify-center rounded-lg"
-                    style={{ width: 36, height: 36, background: (u.renk || tokens.primary) + "18", fontSize: 18 }}
-                  >
-                    {u.emoji || "🏛️"}
-                  </div>
+                  <UniversityLogo university={u} size={36} />
                   <div className="flex-1 min-w-0">
                     <div style={{ fontSize: 12, fontWeight: 600, color: tokens.textPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.ad}</div>
                   </div>

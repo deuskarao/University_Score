@@ -315,23 +315,85 @@ export default function DashboardPage({ dersler, stats, harfNotlari, bolum, akti
               }} />
             </div>
 
-            {/* Etiketler: 0.00 · Hedef · Mevcut · 4.00 */}
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: tokens.muted, fontWeight: 600, position: "relative" }}>
-              <span>0.00</span>
-              {genelGano < hedefGano && (
-                <>
-                  <span style={{ color: tokens.primary, position: "absolute", left: `calc(${(genelGano / 4) * 100}% - 12px)`, transform: "translateX(-50%)" }}>
-                    {genelGano.toFixed(2)}
-                  </span>
-                  <span style={{ color: tokens.success, position: "absolute", left: `calc(${(hedefGano / 4) * 100}% - 14px)`, transform: "translateX(-50%)" }}>
-                    {hedefGano.toFixed(2)}
-                  </span>
-                </>
-              )}
+            {/* Etiketler: 0.00 · Mevcut · Hedef · 4.00
+                Etiketler yakın olduğunda çakışmayı önlemek için:
+                - Mevcut GPA: alt satırda (top: 14px)
+                - Hedef GPA: üst satırda (top: 0px)
+                - Eğer çok yakınsa (|fark| < 0.3), sadece birini göster
+            */}
+            <div style={{ position: "relative", height: 28, fontSize: 10, fontWeight: 700 }}>
+              {/* 0.00 — sol */}
+              <span style={{ position: "absolute", left: 0, top: 14, color: tokens.muted }}>0.00</span>
+
+              {/* 4.00 — sağ */}
+              <span style={{ position: "absolute", right: 0, top: 14, color: tokens.muted }}>4.00</span>
+
+              {genelGano < hedefGano && (() => {
+                const mevcutPct = (genelGano / 4) * 100;
+                const hedefPct = (hedefGano / 4) * 100;
+                const fark = Math.abs(hedefPct - mevcutPct);
+                const cokYakin = fark < 8; // %8'den yakın ise çakışma riski var
+
+                if (cokYakin) {
+                  // Sadece hedefi göster (yeşil, üstte)
+                  return (
+                    <span style={{
+                      position: "absolute",
+                      left: `calc(${hedefPct}% - 4px)`,
+                      top: 0,
+                      transform: "translateX(-50%)",
+                      color: tokens.success,
+                      whiteSpace: "nowrap",
+                    }}>
+                      Hedef: {hedefGano.toFixed(2)}
+                    </span>
+                  );
+                }
+
+                return (
+                  <>
+                    {/* Mevcut GPA — alt satırda (mavi) */}
+                    <span style={{
+                      position: "absolute",
+                      left: `calc(${mevcutPct}% - 4px)`,
+                      top: 14,
+                      transform: "translateX(-50%)",
+                      color: tokens.primary,
+                      whiteSpace: "nowrap",
+                    }}>
+                      {genelGano.toFixed(2)}
+                    </span>
+                    {/* Hedef GPA — üst satırda (yeşil) */}
+                    <span style={{
+                      position: "absolute",
+                      left: `calc(${hedefPct}% - 4px)`,
+                      top: 0,
+                      transform: "translateX(-50%)",
+                      color: tokens.success,
+                      whiteSpace: "nowrap",
+                    }}>
+                      {hedefGano.toFixed(2)}
+                    </span>
+                  </>
+                );
+              })()}
+
               {genelGano >= hedefGano && (
-                <span style={{ color: tokens.success, fontWeight: 700 }}>Hedef geçildi</span>
+                <span style={{
+                  position: "absolute",
+                  left: "50%",
+                  top: 7,
+                  transform: "translateX(-50%)",
+                  color: tokens.success,
+                  fontWeight: 700,
+                  background: tokens.success + "15",
+                  padding: "2px 10px",
+                  borderRadius: 99,
+                  whiteSpace: "nowrap",
+                }}>
+                  ✓ Hedef geçildi
+                </span>
               )}
-              <span>4.00</span>
             </div>
           </div>
 
