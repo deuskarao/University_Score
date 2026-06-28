@@ -4,12 +4,13 @@ import { supabase } from "../lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * Üniversite logosu — Google Favicon API ile domain'den otomatik çekilir.
+ * Üniversite logosu — DuckDuckGo Icons API ile domain'den otomatik çekilir.
  * Logo yüklenemezse emoji fallback gösterilir.
  *
- * Google Favicon API: https://www.google.com/s2/favicons?domain={domain}&sz=64
- * - Clearbit'ten daha güvenilir (Google'ın altyapısı)
- * - Daha küçük resimler ama yeterli (36px için ideal)
+ * DuckDuckGo Icons API: https://icons.duckduckgo.com/ip3/{domain}.ico
+ * - Clearbit kapandı (HTTP 000)
+ * - Google Favicon API 301 redirect veriyor (CORS sorunu)
+ * - DuckDuckGo: test edildi, 200 OK, 128KB gerçek logo
  * - Tüm Türk .edu.tr domainlerini tanır
  */
 function UniversityLogo({ university, size = 36 }) {
@@ -30,10 +31,10 @@ function UniversityLogo({ university, size = 36 }) {
         }}
       >
         <img
-          src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
+          src={`https://icons.duckduckgo.com/ip3/${domain}.ico`}
           alt={university.ad}
-          width={size - 8}
-          height={size - 8}
+          width={size - 6}
+          height={size - 6}
           style={{ objectFit: "contain" }}
           onError={() => setLogoError(true)}
           loading="lazy"
