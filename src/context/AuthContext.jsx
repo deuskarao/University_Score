@@ -256,7 +256,7 @@ export function AuthProvider({ children }) {
     console.log("[AuthContext] fetchProfile tamamlandı");
   }
 
-  async function selectDepartment(deptId) {
+  async function selectDepartment(deptId, facultyId = null) {
     if (!user) return;
     const { data: dept, error: deptErr } = await supabase
       .from("departments")
@@ -265,16 +265,36 @@ export function AuthProvider({ children }) {
       .maybeSingle();
     if (deptErr || !dept) throw deptErr;
 
-    const { data: fd } = await supabase
-      .from("faculty_departments")
-      .select("faculty_id, faculties!inner(id, university_id)")
-      .eq("department_slug", dept.slug)
-      .maybeSingle();
-
     const updates = { department_id: deptId };
-    if (fd?.faculties) {
-      updates.faculty_id = fd.faculty_id;
-      updates.university_id = fd.faculties.university_id;
+
+    if (facultyId) {
+      // Kullanıcının seçtiği fakülte biliniyorsa, doğrudan onu kullan.
+      // Bu, aynı slug'a (örn. "eczacilik") birden fazla üniversitede
+      // rastlanan bölümlerde yanlış/rastgele eşleşmeyi önler.
+      const { data: fac, error: facErr } = await supabase
+        .from("faculties")
+        .select("id, university_id")
+        .eq("id", facultyId)
+        .maybeSingle();
+      if (!facErr && fac) {
+        updates.faculty_id = fac.id;
+        updates.university_id = fac.university_id;
+      }
+    } else {
+      // Geriye dönük uyumluluk: fakülte belirtilmemişse slug üzerinden bul.
+      // Birden fazla eşleşme olabileceğinden .maybeSingle() yerine liste kullanılır.
+      const { data: fdList, error: fdErr } = await supabase
+        .from("faculty_departments")
+        .select("faculty_id, faculties!inner(id, university_id)")
+        .eq("department_slug", dept.slug);
+
+      if (!fdErr && fdList && fdList.length === 1 && fdList[0]?.faculties) {
+        updates.faculty_id = fdList[0].faculty_id;
+        updates.university_id = fdList[0].faculties.university_id;
+      }
+      // fdList.length > 1 ise (birden fazla üniversitede aynı slug) hangi
+      // fakültenin doğru olduğu belirsizdir; faculty_id/university_id boş
+      // bırakılır ki yanlış bir üniversiteye otomatik atanmasın.
     }
 
     const { error } = await supabase.from("profiles").update(updates).eq("id", user.id);

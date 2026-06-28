@@ -192,7 +192,7 @@ function BolumSecim({ onSecim }) {
               const aktif = hoverId === b.slug;
               const fRenk = seciliFakulte?.renk || "#6366f1";
               return (
-                <button key={b.slug} onClick={() => onSecim(b)} onMouseEnter={() => setHoverId(b.slug)} onMouseLeave={() => setHoverId(null)} style={{ background: aktif ? `rgba(${hexToRgb(fRenk)}, 0.12)` : "rgba(10,14,30,0.8)", border: `1.5px solid ${aktif ? fRenk + "70" : "rgba(99,102,241,0.15)"}`, borderRadius: mobil ? 16 : 20, padding: mobil ? "22px 18px" : "28px 24px", cursor:"pointer", textAlign:"left", transition:"all 0.3s cubic-bezier(0.4, 0, 0.2, 1)", transform: aktif ? "translateY(-6px) scale(1.01)" : "none", boxShadow: aktif ? `0 24px 64px ${fRenk}25, 0 0 0 1px ${fRenk}20, inset 0 1px 0 rgba(255,255,255,0.06)` : "0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)", position:"relative", overflow:"hidden" }}>
+                <button key={b.slug} onClick={() => onSecim(b, seciliFakulte)} onMouseEnter={() => setHoverId(b.slug)} onMouseLeave={() => setHoverId(null)} style={{ background: aktif ? `rgba(${hexToRgb(fRenk)}, 0.12)` : "rgba(10,14,30,0.8)", border: `1.5px solid ${aktif ? fRenk + "70" : "rgba(99,102,241,0.15)"}`, borderRadius: mobil ? 16 : 20, padding: mobil ? "22px 18px" : "28px 24px", cursor:"pointer", textAlign:"left", transition:"all 0.3s cubic-bezier(0.4, 0, 0.2, 1)", transform: aktif ? "translateY(-6px) scale(1.01)" : "none", boxShadow: aktif ? `0 24px 64px ${fRenk}25, 0 0 0 1px ${fRenk}20, inset 0 1px 0 rgba(255,255,255,0.06)` : "0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)", position:"relative", overflow:"hidden" }}>
                   <div style={{ position:"relative", zIndex:1 }}>
                     <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:14 }}>
                       <div style={{ width:50, height:50, borderRadius:14, fontSize:26, display:"flex", alignItems:"center", justifyContent:"center", background: `rgba(${hexToRgb(fRenk)}, ${aktif ? 0.25 : 0.15})`, border: `1px solid rgba(${hexToRgb(fRenk)}, ${aktif ? 0.4 : 0.25})`, transition:"all 0.3s", transform: aktif ? "scale(1.08)" : "none" }}>{b.emoji}</div>
@@ -277,7 +277,7 @@ function AuthenticatedApp({ profile, selectDepartment, aktifBolum, setAktifBolum
   if (!profile) return <div style={{ minHeight:"100vh", background:"#080d1a", display:"flex", alignItems:"center", justifyContent:"center" }}><div style={{ color:"#475569", fontSize:14 }}>Profil yükleniyor...</div></div>;
   if (aktifBolum) return <Dashboard bolum={aktifBolum} />;
   if (profile.department_id) return <Dashboard departmentId={profile.department_id} />;
-  return <BolumSecim onSecim={async (b) => { try { await selectDepartment(b.id); setAktifBolum(b); } catch (err) { console.error("Bölüm seçilirken hata:", err); } }} />;
+  return <BolumSecim onSecim={async (b, fakulte) => { try { await selectDepartment(b.id, fakulte?.id || null); setAktifBolum(b); } catch (err) { console.error("Bölüm seçilirken hata:", err); } }} />;
 }
 
 function AdminPanel({ onBackToUser }) {
