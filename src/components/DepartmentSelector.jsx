@@ -122,8 +122,11 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
 
   const getFacultiesForUni = (uniId) => faculties.filter(f => f.university_id === uniId);
   const getDeptsForFaculty = (facId) => {
-    const deptIds = facultyDepartments.filter(fd => fd.faculty_id === facId).map(fd => fd.department_id);
-    return departments.filter(d => deptIds.includes(d.id));
+    // faculty_departments tablosu department_slug kullanır (department_id yok)
+    const deptSlugs = facultyDepartments
+      .filter(fd => fd.faculty_id === facId)
+      .map(fd => fd.department_slug);
+    return departments.filter(d => deptSlugs.includes(d.slug));
   };
 
   const selectedDepts = selectedFaculty ? getDeptsForFaculty(selectedFaculty.id) : [];
