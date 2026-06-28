@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../theme/ThemeProvider";
 import { supabase } from "../lib/supabase";
+import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
@@ -92,6 +93,7 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
 
   const [selectedUni, setSelectedUni] = useState(null);
   const [selectedFaculty, setSelectedFaculty] = useState(null);
+  const { user, updateProfile } = useAuth();
 
   useEffect(() => {
     async function loadData() {
@@ -150,8 +152,8 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
     return null;
   };
 
-  // Bölüm seçilince: doğrudan DB'ye yaz + onSelect callback çağır
-  // Bu, kesin çözüm — updateProfile'e güvenmek yerine doğrudan Supabase çağrılır.
+  // Bölüm seçilince: updateProfile ile DB'ye yaz + onSelect callback çağır
+  // updateProfile AuthContext'ten gelir, auth token dahildir.
   const handleDepartmentSelect = async (deptId) => {
     const dept = departments.find(d => d.id === deptId);
     if (!dept) {
@@ -169,6 +171,11 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
       alert("Hata: Fakülte seçilmemiş!");
       return;
     }
+    if (!user) {
+      console.error("[DepartmentSelector] Kullanıcı girişi yok!");
+      alert("Hata: Giriş yapılmamış. Lütfen tekrar giriş yapın.");
+      return;
+    }
 
     const payload = {
       university_id: selectedUni.id,
@@ -180,52 +187,19 @@ export default function DepartmentSelector({ onSelect, initialValue = null, toke
     console.log("[DepartmentSelector] Fakülte:", selectedFaculty.ad, "→", selectedFaculty.id);
     console.log("[DepartmentSelector] Bölüm:", dept.ad, "→", dept.id);
     console.log("[DepartmentSelector] DB'ye yazılıyor:", payload);
-
-    // 1) Kullanıcı ID'sini al
-    const { data: { user }, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !user) {
-      console.error("[DepartmentSelector] Kullanıcı girişi yok!", userErr);
-      alert("Hata: Giriş yapılmamış. Lütfen tekrar giriş yapın.");
-      return;
-    }
     console.log("[DepartmentSelector] Kullanıcı ID:", user.id);
 
-    // 2) DB'ye yaz (update + select ile doğrula)
-    const { data: updated, error: updateErr } = await supabase
-      .from("profiles")
-      .update(payload)
-      .eq("id", user.id)
-      .select("university_id, faculty_id, department_id");
-
-    if (updateErr) {
-      console.error("[DepartmentSelector] DB update hatası:", updateErr);
-      alert("Bölüm kaydedilemedi: " + updateErr.message);
+    // updateProfile ile DB'ye yaz (AuthContext — auth token dahil)
+    try {
+      await updateProfile(payload);
+      console.log("[DepartmentSelector] ✓ DB'ye yazıldı (updateProfile)");
+    } catch (err) {
+      console.error("[DepartmentSelector] updateProfile hatası:", err);
+      alert("Bölüm kaydedilemedi: " + (err?.message || "Bilinmeyen hata"));
       return;
     }
 
-    // 3) Doğrula — update gerçekten oldu mu?
-    if (!updated || updated.length === 0) {
-      console.error("[DepartmentSelector] Update 0 satır etkiledi! Profile kaydı yok.");
-      alert("Hata: Profil kaydınız bulunamadı. Lütfen destek ile iletişime geçin.");
-      return;
-    }
-
-    const result = updated[0];
-    console.log("[DepartmentSelector] DB doğrulama:", result);
-    if (result.university_id !== payload.university_id) {
-      console.error("[DepartmentSelector] university_id kaydedilmemiş!", result);
-      alert("Hata: Üniversite kaydedilemedi.");
-      return;
-    }
-    if (result.faculty_id !== payload.faculty_id) {
-      console.error("[DepartmentSelector] faculty_id kaydedilmemiş!", result);
-      alert("Hata: Fakülte kaydedilemedi.");
-      return;
-    }
-
-    console.log("[DepartmentSelector] ✓ DB'ye yazıldı ve doğrulandı");
-
-    // 4) Callback çağır (reload için)
+    // Callback çağır (reload için)
     if (onSelect) {
       onSelect(payload);
     }
