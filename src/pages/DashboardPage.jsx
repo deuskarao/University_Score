@@ -251,41 +251,86 @@ export default function DashboardPage({ dersler, stats, harfNotlari, bolum, akti
             </div>
           </div>
 
-          {/* İlerleme çubuğu */}
+          {/* İlerleme çubuğu — çift işaretçi (mevcut + hedef) */}
           <div style={{
             padding: "16px 18px",
             borderRadius: 12,
             background: tokens.surface,
             border: `1px solid ${tokens.border}`,
-            display: "flex", flexDirection: "column", gap: 10,
+            display: "flex", flexDirection: "column", gap: 14,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: 12, color: tokens.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>İlerleme</span>
-              <span style={{ fontSize: 12, color: tokens.textPrimary, fontWeight: 700 }}>{((genelGano / 4) * 100).toFixed(0)}%</span>
-            </div>
-            <div style={{ height: 10, borderRadius: 99, background: tokens.border, overflow: "hidden", position: "relative" }}>
-              <div style={{
-                height: "100%",
-                width: `${(genelGano / 4) * 100}%`,
-                background: `linear-gradient(90deg, ${tokens.primary}, ${tokens.primaryHover})`,
-                borderRadius: 99,
-                transition: "width 600ms cubic-bezier(0.4, 0, 0.2, 1)",
-                position: "relative",
-              }}>
-                {/* Hedef işareti */}
-                <div style={{
-                  position: "absolute",
-                  right: `calc(${100 - (hedefGano / 4) * 100}% - 2px)`,
-                  top: -2, bottom: -2,
-                  width: 3,
-                  background: tokens.success,
-                  borderRadius: 99,
-                }} />
+              <div style={{ display: "flex", gap: 10, fontSize: 11, fontWeight: 700 }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 4, color: tokens.primary }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: tokens.primary, display: "inline-block" }} />
+                  {genelGano.toFixed(2)}
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: 4, color: tokens.success }}>
+                  <span style={{ width: 8, height: 8, borderRadius: 1, background: tokens.success, display: "inline-block" }} />
+                  {hedefGano.toFixed(2)}
+                </span>
               </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: tokens.muted, fontWeight: 600 }}>
+
+            {/* Bar — iki işaretçi ile */}
+            <div style={{ position: "relative", height: 14, padding: "0 4px" }}>
+              {/* Track */}
+              <div style={{
+                position: "absolute", left: 4, right: 4, top: 2, bottom: 2,
+                borderRadius: 99, background: tokens.border, overflow: "hidden",
+              }}>
+                {/* Mevcut ilerleme dolgusu */}
+                <div style={{
+                  height: "100%",
+                  width: `${(genelGano / 4) * 100}%`,
+                  background: `linear-gradient(90deg, ${tokens.primary}, ${tokens.primaryHover})`,
+                  borderRadius: 99,
+                  transition: "width 600ms cubic-bezier(0.4, 0, 0.2, 1)",
+                }} />
+              </div>
+
+              {/* Hedef çizgisi (yeşil dikey çizgi) */}
+              <div style={{
+                position: "absolute",
+                left: `calc(${(hedefGano / 4) * 100}% + 4px - 1.5px)`,
+                top: -2, bottom: -2,
+                width: 3,
+                background: tokens.success,
+                borderRadius: 99,
+                boxShadow: `0 0 0 1px ${tokens.surface}`,
+              }} />
+
+              {/* Mevcut GPA noktası (primary daire) */}
+              <div style={{
+                position: "absolute",
+                left: `calc(${(genelGano / 4) * 100}% + 4px - 6px)`,
+                top: 1,
+                width: 12, height: 12,
+                borderRadius: "50%",
+                background: tokens.primary,
+                border: `2px solid ${tokens.card}`,
+                boxShadow: `0 2px 6px ${tokens.primary}50`,
+                transition: "left 600ms cubic-bezier(0.4, 0, 0.2, 1)",
+              }} />
+            </div>
+
+            {/* Etiketler: 0.00 · Hedef · Mevcut · 4.00 */}
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: tokens.muted, fontWeight: 600, position: "relative" }}>
               <span>0.00</span>
-              <span style={{ color: tokens.success }}>Hedef: {hedefGano.toFixed(2)}</span>
+              {genelGano < hedefGano && (
+                <>
+                  <span style={{ color: tokens.primary, position: "absolute", left: `calc(${(genelGano / 4) * 100}% - 12px)`, transform: "translateX(-50%)" }}>
+                    {genelGano.toFixed(2)}
+                  </span>
+                  <span style={{ color: tokens.success, position: "absolute", left: `calc(${(hedefGano / 4) * 100}% - 14px)`, transform: "translateX(-50%)" }}>
+                    {hedefGano.toFixed(2)}
+                  </span>
+                </>
+              )}
+              {genelGano >= hedefGano && (
+                <span style={{ color: tokens.success, fontWeight: 700 }}>Hedef geçildi</span>
+              )}
               <span>4.00</span>
             </div>
           </div>

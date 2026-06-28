@@ -21,8 +21,45 @@ export function hesaplaHarf(ort, harfNotlari) {
 }
 
 export function harfRengi(harf, harfRenk) {
-  if (harfRenk && harfRenk[harf]) return harfRenk[harf];
-  return "#94a3b8";
+  // Varsayılan: koyu nötr gri
+  const FALLBACK = "#94a3b8";
+  // Düşük kontrastlı renkler için güvenli koyu varyantlar
+  // (DB'deki çok açık yeşil/sarı renkleri beyaz metinle okunabilir hale getirir)
+  const SAFE_OVERRIDES = {
+    AA: "#15803d",
+    AB: "#16a34a",
+    BA: "#4d7c0f",
+    BB: "#65a30d",
+    BC: "#4d7c0f", // BC zaten açık, koyulaştır
+    CB: "#ca8a04",
+    CC: "#d97706",
+    CD: "#ea580c",
+    DC: "#dc2626",
+    DD: "#b91c1c",
+    FF: "#991b1b",
+    DZ: "#7c2d12",
+    EK: "#6b7280",
+  };
+  if (harfRenk && harfRenk[harf]) {
+    const db = harfRenk[harf];
+    // Çok açık renkler (luminans yüksek) için override uygula
+    if (isLowContrast(db) && SAFE_OVERRIDES[harf]) {
+      return SAFE_OVERRIDES[harf];
+    }
+    return db;
+  }
+  return SAFE_OVERRIDES[harf] || FALLBACK;
+}
+
+// Renk luminansını hesapla — 0.7+ çok açık kabul edilir (beyaz metinle kötü kontrast)
+function isLowContrast(hex) {
+  if (!hex || typeof hex !== "string" || !hex.startsWith("#")) return false;
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  // Relative luminans (sRGB)
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return lum > 0.65;
 }
 
 export function ganoRengi(gano, ganoRenkler) {

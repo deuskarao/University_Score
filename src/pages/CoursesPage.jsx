@@ -39,7 +39,10 @@ export default function CoursesPage({ bolum, profile, harfNotlari, harfRenk, sir
                 const hr = harfRengi(harf.harf, harfRenk);
                 const gFin = hesaplaGerekliiFinal(d);
                 return (
-                  <tr key={d.id} style={{ borderBottom: `1px solid ${tokens.border}`, background: i % 2 === 0 ? tokens.surface : "transparent" }}>
+                  <tr key={d.id} className="up-row-hover" style={{ borderBottom: `1px solid ${tokens.border}`, background: i % 2 === 0 ? tokens.surface : "transparent", transition: "background 150ms ease" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = tokens.primary + "08"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = i % 2 === 0 ? tokens.surface : "transparent"; }}
+                  >
                     <td style={{ padding: "12px 14px" }}>
                       <div style={{ fontWeight: 500, color: tokens.textPrimary, fontSize: 13 }}>{d.ad}</div>
                       {d.final === 0 && <div style={{ fontSize: 11, color: tokens.warning, marginTop: 2 }}>Geçmek için final: {gFin.toFixed(0)}</div>}
@@ -49,7 +52,16 @@ export default function CoursesPage({ bolum, profile, harfNotlari, harfRenk, sir
                     <td style={{ padding: "12px 10px", textAlign: "center", color: tokens.muted, fontSize: 13 }}>{d.dersSaati}</td>
                     <td style={{ padding: "12px 10px", textAlign: "center" }}><span style={{ fontSize: 11.5, fontWeight: 700, color: tokens.textSecondary, background: tokens.sidebarHover, border: `1px solid ${tokens.border}`, borderRadius: 99, padding: "3px 10px" }}>{(d.vizeYuzde * 100).toFixed(0)} / {(d.odevYuzde * 100).toFixed(0)} / {(d.projeYuzde * 100).toFixed(0)} / {(d.finalYuzde * 100).toFixed(0)}</span></td>
                     <td style={{ padding: "12px 10px", textAlign: "center" }}><span style={{ fontWeight: 800, fontSize: 14, color: ort >= 70 ? tokens.success : ort >= 60 ? tokens.warning : tokens.danger }}>{ort.toFixed(1)}</span></td>
-                    <td style={{ padding: "12px 10px", textAlign: "center" }}><span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 26, height: 24, padding: "0 8px", borderRadius: 7, background: hr + "18", color: hr, fontSize: 12, fontWeight: 700 }}>{harf.harf}</span></td>
+                    <td style={{ padding: "12px 10px", textAlign: "center" }}>
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        minWidth: 30, height: 26, padding: "0 10px", borderRadius: 7,
+                        background: hr, color: "#fff",
+                        fontSize: 12, fontWeight: 800, letterSpacing: 0.3,
+                        boxShadow: `0 2px 6px ${hr}30`,
+                        textShadow: "0 1px 2px rgba(0,0,0,0.15)",
+                      }}>{harf.harf}</span>
+                    </td>
                     <td style={{ padding: "12px 10px", textAlign: "center", fontSize: 13, fontWeight: 700, color: tokens.textSecondary }}>{(d.kredi * harf.katsayi).toFixed(2)}</td>
                     <td style={{ padding: "12px 10px", textAlign: "center" }}>
                       {canEdit && <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>

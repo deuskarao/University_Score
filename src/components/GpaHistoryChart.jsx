@@ -66,9 +66,13 @@ export default function GpaHistoryChart({ data }) {
             tick={{ fill: tokens.muted, fontSize: 11, fontWeight: 600 }}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: tokens.primary, opacity: 0.05 }} />
-          <Bar dataKey="gpa" radius={[6, 6, 0, 0]} maxBarSize={42}>
+          <Bar dataKey="gpa" radius={[6, 6, 0, 0]} maxBarSize={42} animationDuration={600}>
             {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill="url(#barGrad)" />
+              <Cell
+                key={`cell-${index}`}
+                fill="url(#barGrad)"
+                style={{ cursor: "pointer", transition: "opacity 150ms ease" }}
+              />
             ))}
           </Bar>
         </BarChart>

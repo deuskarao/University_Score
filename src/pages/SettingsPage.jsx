@@ -409,7 +409,12 @@ export default function SettingsPage({ dersler, stats, bolum }) {
               padding: "16px 22px",
               borderRight: `1px solid ${tokens.border}`,
               borderBottom: `1px solid ${tokens.border}`,
-            }}>
+              transition: "background 150ms ease",
+              cursor: "default",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = tokens.primary + "06"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            >
               <div style={{ fontSize: 11, color: tokens.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
                 {item.icon} {item.label}
               </div>
