@@ -114,6 +114,70 @@ export default function SettingsPage({ dersler, stats, bolum }) {
   const [deptResetError, setDeptResetError] = useState("");
   const [deptSelectOpen, setDeptSelectOpen] = useState(false); // Bölüm seçme modalı
 
+  // Şifre değiştirme — Supabase auth.updateUser ile
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  function handlePasswordChangeClick() {
+    setNewPassword("");
+    setConfirmPassword("");
+    setPasswordError("");
+    setPasswordSuccess(false);
+    setPasswordModalOpen(true);
+  }
+
+  async function handlePasswordSubmit(e) {
+    if (e) e.preventDefault();
+    setPasswordError("");
+
+    // Validasyon
+    if (!newPassword) {
+      setPasswordError("Lütfen yeni şifrenizi girin.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordError("Şifre en az 6 karakter olmalıdır.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Şifreler eşleşmiyor.");
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      // Supabase Auth: şifre güncelleme
+      // Bu, auth.users tablosunda password_hash'i güvenli şekilde günceller
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        setPasswordError(error.message || "Şifre güncellenemedi.");
+        return;
+      }
+
+      // Başarılı
+      setPasswordSuccess(true);
+      setNewPassword("");
+      setConfirmPassword("");
+      // 3 saniye sonra modalı kapat
+      setTimeout(() => {
+        setPasswordModalOpen(false);
+        setPasswordSuccess(false);
+      }, 3000);
+    } catch (err) {
+      console.error("Şifre değiştirme hatası:", err);
+      setPasswordError(err?.message || "Şifre güncellenemedi. Lütfen tekrar deneyin.");
+    } finally {
+      setPasswordLoading(false);
+    }
+  }
+
   function handleResetDepartmentClick() {
     setDeptResetError("");
     setDeptResetOpen(true);
@@ -448,27 +512,49 @@ export default function SettingsPage({ dersler, stats, bolum }) {
             </div>
             <span style={{ fontSize: 13, fontWeight: 700, color: tokens.textPrimary }}>Hesap Bilgileri</span>
           </div>
-          <button
-            onClick={handleResetDepartmentClick}
-            disabled={isUpdatingDept}
-            style={{
-              padding: "7px 14px", borderRadius: 8, background: tokens.primary + "12",
-              border: `1px solid ${tokens.primary}40`, color: tokens.primary,
-              fontSize: 12, fontWeight: 600, cursor: isUpdatingDept ? "wait" : "pointer",
-              transition: "all 0.2s",
-              display: "inline-flex", alignItems: "center", gap: 6,
-            }}
-            onMouseEnter={(e) => { if (!isUpdatingDept) { e.currentTarget.style.background = tokens.primary + "20"; e.currentTarget.style.borderColor = tokens.primary + "60"; } }}
-            onMouseLeave={(e) => { if (!isUpdatingDept) { e.currentTarget.style.background = tokens.primary + "12"; e.currentTarget.style.borderColor = tokens.primary + "40"; } }}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M23 4v6h-6"/>
-              <path d="M1 20v-6h6"/>
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/>
-              <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/>
-            </svg>
-            {isUpdatingDept ? "Güncelleniyor..." : "Bölümü Değiştir"}
-          </button>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button
+              onClick={handlePasswordChangeClick}
+              style={{
+                padding: "7px 14px", borderRadius: 8, background: tokens.warning + "12",
+                border: `1px solid ${tokens.warning}40`, color: tokens.warning,
+                fontSize: 12, fontWeight: 600, cursor: "pointer",
+                transition: "all 0.2s",
+                display: "inline-flex", alignItems: "center", gap: 6,
+                fontFamily: "inherit",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = tokens.warning + "20"; e.currentTarget.style.borderColor = tokens.warning + "60"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = tokens.warning + "12"; e.currentTarget.style.borderColor = tokens.warning + "40"; }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              Şifre Değiştir
+            </button>
+            <button
+              onClick={handleResetDepartmentClick}
+              disabled={isUpdatingDept}
+              style={{
+                padding: "7px 14px", borderRadius: 8, background: tokens.primary + "12",
+                border: `1px solid ${tokens.primary}40`, color: tokens.primary,
+                fontSize: 12, fontWeight: 600, cursor: isUpdatingDept ? "wait" : "pointer",
+                transition: "all 0.2s",
+                display: "inline-flex", alignItems: "center", gap: 6,
+                fontFamily: "inherit",
+              }}
+              onMouseEnter={(e) => { if (!isUpdatingDept) { e.currentTarget.style.background = tokens.primary + "20"; e.currentTarget.style.borderColor = tokens.primary + "60"; } }}
+              onMouseLeave={(e) => { if (!isUpdatingDept) { e.currentTarget.style.background = tokens.primary + "12"; e.currentTarget.style.borderColor = tokens.primary + "40"; } }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 4v6h-6"/>
+                <path d="M1 20v-6h6"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/>
+                <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/>
+              </svg>
+              {isUpdatingDept ? "Güncelleniyor..." : "Bölümü Değiştir"}
+            </button>
+          </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
           {[
@@ -733,6 +819,203 @@ export default function SettingsPage({ dersler, stats, bolum }) {
               tokens={tokens}
               onSelect={handleDepartmentSelect}
             />
+          </div>
+        </Overlay>
+      )}
+
+      {/* Şifre Değiştirme Modalı */}
+      {passwordModalOpen && (
+        <Overlay onClick={() => !passwordLoading && !passwordSuccess && setPasswordModalOpen(false)}>
+          <div
+            style={{
+              background: tokens.card,
+              border: `1px solid ${tokens.border}`,
+              borderRadius: 20,
+              padding: "32px 28px 28px",
+              maxWidth: 420,
+              width: "90%",
+              textAlign: "center",
+              boxShadow: tokens.shadowLg,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {passwordSuccess ? (
+              <>
+                <div style={{
+                  width: 60, height: 60, borderRadius: 16,
+                  background: tokens.success + "12",
+                  border: `1px solid ${tokens.success}25`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  margin: "0 auto 18px",
+                }}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={tokens.success} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                </div>
+                <h3 style={{ color: tokens.textPrimary, margin: "0 0 8px", fontSize: 18, fontWeight: 700 }}>
+                  Şifre Güncellendi! ✓
+                </h3>
+                <p style={{ color: tokens.muted, fontSize: 13, margin: "0 0 16px", lineHeight: 1.5 }}>
+                  Şifreniz başarıyla değiştirildi. Bir sonraki giriş yapışınızda yeni şifrenizi kullanabilirsiniz.
+                </p>
+                <p style={{ color: tokens.muted, fontSize: 11, margin: 0 }}>
+                  Pencere 3 saniye içinde kapanacak...
+                </p>
+              </>
+            ) : (
+              <form onSubmit={handlePasswordSubmit}>
+                <div style={{
+                  width: 60, height: 60, borderRadius: 16,
+                  background: tokens.warning + "12",
+                  border: `1px solid ${tokens.warning}25`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  margin: "0 auto 18px",
+                  color: tokens.warning,
+                }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                </div>
+
+                <h3 style={{ color: tokens.textPrimary, margin: "0 0 6px", fontSize: 18, fontWeight: 700 }}>
+                  Şifre Değiştir
+                </h3>
+                <p style={{ color: tokens.muted, fontSize: 12, margin: "0 0 20px", lineHeight: 1.5 }}>
+                  Yeni şifrenizi belirleyin. En az 6 karakter olmalı.
+                </p>
+
+                <div style={{ textAlign: "left", marginBottom: 12 }}>
+                  <label style={{
+                    display: "block", fontSize: 11, color: tokens.textSecondary,
+                    fontWeight: 600, marginBottom: 5, letterSpacing: "0.2px",
+                  }}>
+                    Yeni Şifre
+                  </label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => { setNewPassword(e.target.value); setPasswordError(""); }}
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                    autoFocus
+                    style={{
+                      ...inputStyle,
+                      ...(passwordError ? { borderColor: tokens.danger + "60", background: tokens.danger + "08" } : {}),
+                    }}
+                  />
+                </div>
+
+                <div style={{ textAlign: "left", marginBottom: 16 }}>
+                  <label style={{
+                    display: "block", fontSize: 11, color: tokens.textSecondary,
+                    fontWeight: 600, marginBottom: 5, letterSpacing: "0.2px",
+                  }}>
+                    Şifreyi Tekrar Gir
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(""); }}
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                    style={{
+                      ...inputStyle,
+                      ...(passwordError ? { borderColor: tokens.danger + "60", background: tokens.danger + "08" } : {}),
+                    }}
+                  />
+                </div>
+
+                {passwordError && (
+                  <div style={{
+                    margin: "0 0 16px",
+                    padding: "10px 14px",
+                    borderRadius: 10,
+                    background: tokens.danger + "08",
+                    border: `1px solid ${tokens.danger}25`,
+                    display: "flex", alignItems: "center", gap: 8,
+                    color: tokens.danger, fontSize: 11.5, fontWeight: 500,
+                    textAlign: "left",
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="8" x2="12" y2="12"/>
+                      <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    {passwordError}
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+                  <button
+                    type="button"
+                    onClick={() => setPasswordModalOpen(false)}
+                    disabled={passwordLoading}
+                    style={{
+                      padding: "10px 20px", borderRadius: 10,
+                      border: `1px solid ${tokens.border}`,
+                      background: "transparent",
+                      color: tokens.textSecondary,
+                      cursor: passwordLoading ? "default" : "pointer",
+                      fontWeight: 600, fontSize: 13,
+                      fontFamily: "inherit",
+                      transition: "all 0.15s",
+                      opacity: passwordLoading ? 0.5 : 1,
+                    }}
+                    onMouseEnter={(e) => { if (!passwordLoading) { e.currentTarget.style.background = tokens.surface; e.currentTarget.style.color = tokens.textPrimary; } }}
+                    onMouseLeave={(e) => { if (!passwordLoading) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.textSecondary; } }}
+                  >
+                    İptal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={passwordLoading}
+                    style={{
+                      padding: "10px 22px", borderRadius: 10,
+                      border: "none",
+                      background: passwordLoading
+                        ? tokens.warning + "60"
+                        : `linear-gradient(135deg, ${tokens.warning}, #d97706)`,
+                      color: "#fff",
+                      cursor: passwordLoading ? "wait" : "pointer",
+                      fontWeight: 600, fontSize: 13,
+                      fontFamily: "inherit",
+                      transition: "all 0.15s",
+                      boxShadow: passwordLoading ? "none" : `0 4px 14px ${tokens.warning}40`,
+                      display: "inline-flex", alignItems: "center", gap: 8,
+                    }}
+                    onMouseEnter={(e) => { if (!passwordLoading) { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = `0 6px 18px ${tokens.warning}50`; } }}
+                    onMouseLeave={(e) => { if (!passwordLoading) { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 14px ${tokens.warning}40`; } }}
+                  >
+                    {passwordLoading ? (
+                      <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "spin 1s linear infinite" }}>
+                          <line x1="12" y1="2" x2="12" y2="6"/>
+                          <line x1="12" y1="18" x2="12" y2="22"/>
+                          <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/>
+                          <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+                          <line x1="2" y1="12" x2="6" y2="12"/>
+                          <line x1="18" y1="12" x2="22" y2="12"/>
+                          <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/>
+                          <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+                        </svg>
+                        Güncelleniyor...
+                      </>
+                    ) : (
+                      <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Şifreyi Güncelle
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </Overlay>
       )}
