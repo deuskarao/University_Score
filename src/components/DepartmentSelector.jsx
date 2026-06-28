@@ -4,58 +4,81 @@ import { supabase } from "../lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * Üniversite logosu — DuckDuckGo Icons API ile domain'den otomatik çekilir.
- * Logo yüklenemezse emoji fallback gösterilir.
+ * Üniversite logosu — SVG tabanlı baş harf rozeti.
  *
- * DuckDuckGo Icons API: https://icons.duckduckgo.com/ip3/{domain}.ico
- * - Clearbit kapandı (HTTP 000)
- * - Google Favicon API 301 redirect veriyor (CORS sorunu)
- * - DuckDuckGo: test edildi, 200 OK, 128KB gerçek logo
- * - Tüm Türk .edu.tr domainlerini tanır
+ * Dış API'ler güvenilmez:
+ * - Clearbit: kapandı
+ * - Google Favicon: CORS sorunu
+ * - DuckDuckGo: bazı domainleri tanımıyor, bozuk görünüyor
+ *
+ * Çözüm: Her üniversite için DB'deki renk ile gradient arka plan +
+ * üniversite adının baş harfi. Kırılmaz, hızlı, temiz.
+ *
+ * Ekstra: 3 harfli kısaltma (örn: İTÜ, ODTÜ, İTÜ) özel isimler için.
  */
+const KISALTMALAR = {
+  "İstanbul Teknik Üniversitesi (İTÜ)": "İTÜ",
+  "Orta Doğu Teknik Üniversitesi (ODTÜ)": "ODTÜ",
+  "İzmir Yüksek Teknoloji Enstitüsü (İYTE)": "İYTE",
+  "İhsan Doğramacı Bilkent Üniversitesi": "BİLKENT",
+  "Boğaziçi Üniversitesi": "BOĞAZİÇİ",
+  "İstanbul Üniversitesi": "İSTANBUL",
+  "Hacettepe Üniversitesi": "HACETTEPE",
+  "Ankara Üniversitesi": "ANKARA",
+  "Marmara Üniversitesi": "MARMARA",
+  "Yıldız Teknik Üniversitesi": "YTÜ",
+  "Gebze Teknik Üniversitesi": "GTÜ",
+  "Eskişehir Teknik Üniversitesi": "ESTÜ",
+  "Karadeniz Teknik Üniversitesi": "KTÜ",
+  "Bursa Uludağ Üniversitesi": "ULUDAĞ",
+  "Akdeniz Üniversitesi": "AKDENİZ",
+  "Dokuz Eylül Üniversitesi": "DEÜ",
+  "Çukurova Üniversitesi": "ÇUKUROVA",
+  "Erciyes Üniversitesi": "ERCİYES",
+  "Atatürk Üniversitesi": "ATAÜ",
+  "Pamukkale Üniversitesi": "PAÜ",
+  "Kocaeli Üniversitesi": "KOCAELİ",
+  "Selçuk Üniversitesi": "SELÇUK",
+  "Gaziantep Üniversitesi": "GAZİANTEP",
+  "Anadolu Üniversitesi": "AÜ",
+  "Ege Üniversitesi": "EÜ",
+  "Koç Üniversitesi": "KOÇ",
+  "Sabancı Üniversitesi": "SABANCI",
+  "Galatasaray Üniversitesi": "GSÜ",
+  "Gazi Üniversitesi": "GAZİ",
+};
+
 function UniversityLogo({ university, size = 36 }) {
   const { tokens } = useTheme();
-  const [logoError, setLogoError] = useState(false);
-  const domain = university?.domain;
+  const color = university?.renk || tokens.primary;
+  const ad = university?.ad || "?";
 
-  // Logo varsa ve hata yoksa: <img>
-  if (domain && !logoError) {
-    return (
-      <div
-        className="flex items-center justify-center rounded-lg overflow-hidden"
-        style={{
-          width: size, height: size,
-          background: "#fff",
-          border: `1px solid ${tokens.border}`,
-          flexShrink: 0,
-        }}
-      >
-        <img
-          src={`https://icons.duckduckgo.com/ip3/${domain}.ico`}
-          alt={university.ad}
-          width={size - 6}
-          height={size - 6}
-          style={{ objectFit: "contain" }}
-          onError={() => setLogoError(true)}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-        />
-      </div>
-    );
-  }
+  // Kısaltma varsa onu kullan, yoksa baş harfi
+  const kisaltma = KISALTMALAR[ad];
+  const initial = ad[0]?.toUpperCase() || "?";
+  const text = kisaltma || initial;
 
-  // Fallback: emoji (eski davranış)
+  // Kısaltma uzunsa font küçült
+  const fontSize = kisaltma
+    ? (kisaltma.length > 4 ? size * 0.22 : size * 0.28)
+    : size * 0.45;
+
   return (
     <div
       className="flex items-center justify-center rounded-lg"
       style={{
         width: size, height: size,
-        background: (university.renk || tokens.primary) + "18",
-        fontSize: size * 0.5,
+        background: `linear-gradient(135deg, ${color}, ${color}cc)`,
+        color: "#fff",
+        fontSize,
+        fontWeight: 800,
         flexShrink: 0,
+        letterSpacing: -0.5,
+        boxShadow: `0 2px 6px ${color}30`,
+        textShadow: "0 1px 2px rgba(0,0,0,0.15)",
       }}
     >
-      {university.emoji || "🏛️"}
+      {text}
     </div>
   );
 }
