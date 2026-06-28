@@ -3,6 +3,7 @@ import { useTheme } from "../theme/ThemeProvider";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 import { Overlay, useInputStyle, useWindowSize } from "../components/shared.jsx";
+import { useHedefGano } from "../hooks/useHedefGano";
 
 function downloadFile(filename, content, mime) {
   const blob = new Blob([content], { type: mime });
@@ -16,11 +17,16 @@ function downloadFile(filename, content, mime) {
 export default function SettingsPage({ dersler, stats, bolum }) {
   const { tokens, mode, setMode } = useTheme();
   const { user, profile, logout, updateProfile } = useAuth();
+  const { hedefGano, setHedefGano, resetHedefGano, defaultHedef } = useHedefGano();
   const [notifEmail, setNotifEmail] = useState(true);
   const [notifGrade, setNotifGrade] = useState(true);
   const [facultyName, setFacultyName] = useState(null);
   const [universityName, setUniversityName] = useState(null);
   const [isUpdatingDept, setIsUpdatingDept] = useState(false);
+  const [hedefInput, setHedefInput] = useState(String(hedefGano.toFixed(2)));
+  const [hedefError, setHedefError] = useState("");
+
+  useEffect(() => { setHedefInput(hedefGano.toFixed(2)); }, [hedefGano]);
 
   const w = useWindowSize();
   const mobil = w < 768;
@@ -200,7 +206,7 @@ export default function SettingsPage({ dersler, stats, bolum }) {
       </div>
 
       {/* ── Alt Grid ── */}
-      <div style={{ display: "grid", gridTemplateColumns: mobil ? "1fr" : "1fr 1fr 1fr", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: mobil ? "1fr" : "1fr 1fr 1fr 1fr", gap: 16 }}>
 
         {/* Bildirimler */}
         <SettingCard
@@ -268,10 +274,103 @@ export default function SettingsPage({ dersler, stats, bolum }) {
             </ExportButton>
           </div>
           {dersler?.length > 0 && (
-            <div style={{ marginTop: 12, padding: "8px 12px", borderRadius: 8, background: tokens.surface, border: `1px solid ${tokens.border}`, fontSize: 11, color: tokens.muted }}>
-              📊 {dersler.length} ders · {stats?.totalKredi || 0} toplam kredi
+            <div style={{ marginTop: 12, padding: "8px 12px", borderRadius: 8, background: tokens.surface, border: `1px solid ${tokens.border}`, fontSize: 11, color: tokens.muted, display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              {dersler.length} ders · {stats?.totalKredi || 0} toplam kredi
             </div>
           )}
+        </SettingCard>
+
+        {/* Hedef GPA */}
+        <SettingCard
+          tokens={tokens}
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>}
+          title="Hedef GPA"
+        >
+          <p style={{ fontSize: 12, color: tokens.muted, margin: "0 0 12px", lineHeight: 1.5 }}>
+            Onur derecesi için hedefini belirle. Dashboard'da ilerlemen bu hedefe göre ölçülür.
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+            <input
+              type="number"
+              min="0"
+              max="4"
+              step="0.05"
+              value={hedefInput}
+              onChange={(e) => { setHedefInput(e.target.value); setHedefError(""); }}
+              style={{
+                ...inputStyle,
+                flex: 1,
+                fontWeight: 700,
+                fontSize: 16,
+                color: tokens.primary,
+                textAlign: "center",
+              }}
+            />
+            <span style={{ fontSize: 12, color: tokens.muted, fontWeight: 600 }}>/ 4.00</span>
+          </div>
+          {hedefError && (
+            <div style={{ background: tokens.danger + "10", border: `1px solid ${tokens.danger}25`, borderRadius: 8, padding: "6px 10px", marginBottom: 10, color: tokens.danger, fontSize: 11, fontWeight: 500 }}>
+              {hedefError}
+            </div>
+          )}
+          {/* Hızlı seçim */}
+          <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+            {[2.00, 2.50, 3.00, 3.50].map((v) => (
+              <button
+                key={v}
+                onClick={() => { setHedefInput(v.toFixed(2)); setHedefError(""); }}
+                style={{
+                  flex: 1, padding: "6px 0", borderRadius: 7,
+                  border: `1px solid ${hedefGano.toFixed(2) === v.toFixed(2) ? tokens.primary + "50" : tokens.border}`,
+                  background: hedefGano.toFixed(2) === v.toFixed(2) ? tokens.primary + "12" : "transparent",
+                  color: hedefGano.toFixed(2) === v.toFixed(2) ? tokens.primary : tokens.muted,
+                  fontSize: 11, fontWeight: 700, cursor: "pointer",
+                  fontFamily: "inherit", transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => { if (hedefGano.toFixed(2) !== v.toFixed(2)) { e.currentTarget.style.borderColor = tokens.primary + "30"; e.currentTarget.style.color = tokens.textPrimary; } }}
+                onMouseLeave={(e) => { if (hedefGano.toFixed(2) !== v.toFixed(2)) { e.currentTarget.style.borderColor = tokens.border; e.currentTarget.style.color = tokens.muted; } }}
+              >
+                {v.toFixed(2)}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              onClick={() => {
+                const ok = setHedefGano(hedefInput);
+                if (!ok) setHedefError("Lütfen 0.00 ile 4.00 arasında bir değer girin.");
+              }}
+              style={{
+                flex: 1, padding: "8px 0", borderRadius: 8,
+                background: `linear-gradient(135deg, ${tokens.primary}, ${tokens.primaryHover})`,
+                color: "#fff", border: "none", cursor: "pointer",
+                fontWeight: 600, fontSize: 12, fontFamily: "inherit",
+                boxShadow: `0 4px 12px ${tokens.primary}30`,
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
+            >
+              Kaydet
+            </button>
+            {hedefGano.toFixed(2) !== defaultHedef.toFixed(2) && (
+              <button
+                onClick={() => { resetHedefGano(); setHedefError(""); }}
+                style={{
+                  padding: "8px 12px", borderRadius: 8,
+                  background: "transparent", color: tokens.muted,
+                  border: `1px solid ${tokens.border}`, cursor: "pointer",
+                  fontWeight: 600, fontSize: 12, fontFamily: "inherit",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = tokens.textPrimary; e.currentTarget.style.borderColor = tokens.primary + "30"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = tokens.muted; e.currentTarget.style.borderColor = tokens.border; }}
+              >
+                Sıfırla
+              </button>
+            )}
+          </div>
         </SettingCard>
       </div>
 

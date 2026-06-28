@@ -125,7 +125,7 @@ export default function AppShell({ bolumProp, departmentId }) {
             </div>
           ) : (
             <>
-              {activePage === "dashboard" && <DashboardPage dersler={d.dersler} stats={d.stats} harfNotlari={d.harfNotlari} bolum={d.bolum} />}
+              {activePage === "dashboard" && <DashboardPage dersler={d.dersler} stats={d.stats} harfNotlari={d.harfNotlari} bolum={d.bolum} aktifDonem={d.aktifDonem} />}
               {activePage === "courses" && (
                 <CoursesPage
                   bolum={d.bolum}

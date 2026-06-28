@@ -4,6 +4,55 @@ import KpiCard from "../components/KpiCard";
 import GpaTrendChart from "../components/GpaTrendChart";
 import CreditDonutChart from "../components/CreditDonutChart";
 import { hesaplaDönemOrt, hesaplaHarf } from "../hooks/useDersler";
+import { useHedefGano } from "../hooks/useHedefGano";
+
+// Mini sparkline — "Bu Dönem" kartında seçili dönem notlarını gösterir
+function MiniSparkline({ dersler, color, height = 28 }) {
+  const { tokens } = useTheme();
+  if (!dersler || dersler.length === 0) {
+    return (
+      <div style={{ height, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: tokens.muted, fontStyle: "italic" }}>
+        Bu dönem için not yok
+      </div>
+    );
+  }
+  const values = dersler.map(d => Math.min(100, Math.max(0, d.ort)));
+  const max = 100;
+  const w = 100;
+  const h = height;
+  const padding = 2;
+  const stepX = (w - padding * 2) / Math.max(1, values.length - 1);
+  const points = values.map((v, i) => {
+    const x = padding + i * stepX;
+    const y = h - padding - (v / max) * (h - padding * 2);
+    return `${x.toFixed(2)},${y.toFixed(2)}`;
+  });
+  const linePath = `M ${points.join(" L ")}`;
+  const areaPath = `${linePath} L ${padding + (values.length - 1) * stepX},${h - padding} L ${padding},${h - padding} Z`;
+  const lastIdx = values.length - 1;
+  const lastX = padding + lastIdx * stepX;
+  const lastY = h - padding - (values[lastIdx] / max) * (h - padding * 2);
+
+  return (
+    <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: "block" }}>
+      <defs>
+        <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      {/* Hedef çizgisi (60 = geçme barajı) */}
+      <line
+        x1={padding} y1={h - padding - (60 / max) * (h - padding * 2)}
+        x2={w - padding} y2={h - padding - (60 / max) * (h - padding * 2)}
+        stroke={tokens.border} strokeWidth="0.5" strokeDasharray="2 2"
+      />
+      <path d={areaPath} fill="url(#sparkGrad)" />
+      <path d={linePath} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={lastX} cy={lastY} r="2" fill={color} stroke={tokens.card} strokeWidth="1" />
+    </svg>
+  );
+}
 
 function SectionCard({ title, subtitle, children }) {
   const { tokens } = useTheme();
@@ -23,7 +72,7 @@ function SectionCard({ title, subtitle, children }) {
   );
 }
 
-const ICONDS = {
+const ICONS = {
   term: (color = "currentColor") => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -77,8 +126,9 @@ const ICONDS = {
   ),
 };
 
-export default function DashboardPage({ dersler, stats, harfNotlari, bolum }) {
+export default function DashboardPage({ dersler, stats, harfNotlari, bolum, aktifDonem: aktifDonemProp }) {
   const { tokens } = useTheme();
+  const { hedefGano } = useHedefGano();
 
   const gpaTrendData = useMemo(() => {
     const aktifDonemler = new Set(dersler.filter((d) => d.vize > 0 || d.odev > 0 || d.proje > 0 || d.final > 0 || d.harfNotu).map((d) => d.donem));
@@ -103,10 +153,18 @@ export default function DashboardPage({ dersler, stats, harfNotlari, bolum }) {
     });
   }, [dersler, harfNotlari, bolum]);
 
-  const { riskli, yaklasan, guclu, enYuksek, enDusuk } = stats;
+  // Seçili dönemin ders listesi (sparkline için)
+  const seciliDonemDersler = useMemo(() => {
+    if (!aktifDonemProp || aktifDonemProp === "tumu") return [];
+    return dersler
+      .filter((d) => d.donem === Number(aktifDonemProp))
+      .map((d) => ({ ...d, ort: hesaplaDönemOrt(d) }))
+      .filter((d) => d.ort > 0);
+  }, [dersler, aktifDonemProp]);
+
+  const { riskli, yaklasan, guclu } = stats;
 
   // Hedef hesaplamaları
-  const hedefGano = 3.00;
   const genelGano = parseFloat(stats.gano) || 0;
   const hedefMesafesi = Math.max(0, hedefGano - genelGano).toFixed(2);
 
@@ -266,6 +324,19 @@ export default function DashboardPage({ dersler, stats, harfNotlari, bolum }) {
                     <><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={tokens.warning} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg> Genelden {Math.abs(sonDonemGano - genelGano).toFixed(2)} aşağıda</>
                   )}
                 </div>
+                {/* Mini sparkline — bu dönemki ders ortalamaları */}
+                {seciliDonemDersler.length > 0 && (
+                  <div style={{ marginTop: 6 }}>
+                    <div style={{ fontSize: 10, color: tokens.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                      Ders Ortalamaları · {seciliDonemDersler.length} ders
+                    </div>
+                    <MiniSparkline
+                      dersler={seciliDonemDersler}
+                      color={donemYon === "yukari" ? tokens.success : tokens.warning}
+                      height={32}
+                    />
+                  </div>
+                )}
               </>
             ) : (
               <div style={{ fontSize: 12, color: tokens.muted, fontWeight: 500 }}>
